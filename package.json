@@ -7,7 +7,8 @@
   "author": "btzr-io <btzr.io@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "start": "node src/index.js"
+    "start": "node src/index.js",
+    "format": "npx -p prettier@latest -p pretty-quick pretty-quick"
   },
   "dependencies": {
     "chance": "^1.1.7",

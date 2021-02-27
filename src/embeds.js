@@ -5,10 +5,10 @@ const COMMAND_LIST = {
   **!help** - Show command list
   **!about** - Project description
   **!random | !shuffle** genre - Random song
-  `
-}
+  `,
+};
 
-const ABOUT =  {
+const ABOUT = {
   color: 3447003,
   title: "Hound.fm",
   description: `
@@ -20,10 +20,10 @@ const ABOUT =  {
   **Support**
   Help development with a small donation (LBC):
   \`\`\`bPMkcKtur8cuEDK2RH6QjTyyL7JpiqUmkK \`\`\`
-  `
-}
+  `,
+};
 
 module.exports = {
   ABOUT,
   COMMAND_LIST,
-}
+};
