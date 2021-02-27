@@ -6,6 +6,8 @@ const fetch = require('node-fetch');
 const Discord = require("discord.js");
 const client = new Discord.Client();
 
+const EMBED = require('./embeds.js');
+
 // Import utils
 const {  odyseeLink, parseMessage, getRandomItem } = require("./utils.js");
 
@@ -21,13 +23,11 @@ client.on("message", async (message) => {
   const { args, command } =  parseMessage(message, prefix)
 
   if ( command === "help" ) {
-    message.channel.send({embed: {
-      color: 3447003,
-      description: `
-      **!help** - Show command list
-      **!random** genre - Find a random song
-      `
-    }});
+    message.channel.send({embed: EMBED.COMMAND_LIST });
+  }
+
+  if (command === "about") {
+    message.channel.send({embed: EMBED.ABOUT })
   }
 
   if (command === "random" || command === "shuffle") {
