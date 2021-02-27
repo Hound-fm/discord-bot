@@ -20,6 +20,16 @@ client.on("message", async (message) => {
 
   const { args, command } =  parseMessage(message, prefix)
 
+  if ( command === "help" ) {
+    message.channel.send({embed: {
+      color: 3447003,
+      description: `
+      **!help** - Show command list
+      **!random** genre - Find a random song
+      `
+    }});
+  }
+
   if (command === "random" || command === "shuffle") {
     let [genre] = args
     genre = genre.replace(/-/g, ' ')
