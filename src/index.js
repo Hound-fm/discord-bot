@@ -8,14 +8,14 @@ const Hound = require("./api.js");
 const Chance = require("chance");
 const Discord = require("discord.js");
 
-// Random util
-const chance = new Chance();
-
 // Import utils
 const { odyseeLink, parseMessage, isBotMention } = require("./utils.js");
 
 // Discord client
 const client = new Discord.Client();
+
+const chance_group = new Chance("78jkseed");
+const chance_list = new Chance("92fhseed");
 
 let prefix = "!";
 
@@ -44,12 +44,12 @@ client.on("message", async (message) => {
       genre = genre.replace(/-/g, " ");
     }
     // Randomize content group
-    const group = chance.pickone(["latest", "popular"]);
+    const group = chance_group.pickone(["latest", "popular"]);
     // Get streams list
     const list = await Hound.getStreams(genre, group);
     // Validate list
     if (list && list.length) {
-      const stream = chance.pickone(list);
+      const stream = chance_list.pickone(list);
       if (stream && stream.cannonical_url) {
         message.channel.send(odyseeLink(stream.cannonical_url));
       }
