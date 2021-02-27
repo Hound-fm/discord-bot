@@ -10,6 +10,9 @@ const parseMessage = (message, prefix) =>  {
   return { args, command }
 }
 
+const isBotMention = (client, message) => message.mentions.users.get(client.user.id) != null
+
+
 
 const getRandomItem = (list) => {
   let item = null
@@ -22,4 +25,4 @@ const getRandomItem = (list) => {
   return item
 }
 
-module.exports = { odyseeLink, parseMessage, getRandomItem }
+module.exports = { odyseeLink, parseMessage, getRandomItem, isBotMention }

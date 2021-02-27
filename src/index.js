@@ -9,7 +9,7 @@ const client = new Discord.Client();
 const EMBED = require('./embeds.js');
 
 // Import utils
-const {  odyseeLink, parseMessage, getRandomItem } = require("./utils.js");
+const {  odyseeLink, parseMessage, getRandomItem, isBotMention } = require("./utils.js");
 
 // Set the prefix
 let prefix = "!";
@@ -17,7 +17,13 @@ let prefix = "!";
 const HOUND_API = "https://api.hound.fm/"
 
 client.on("message", async (message) => {
-  // Exit and stop if the prefix is not there or if user is a bot
+
+  if(isBotMention(client, message)) {
+    console.info(message.content)
+    message.channel.send({embed: EMBED.ABOUT })
+    return
+  }
+
   if (!message.content.startsWith(prefix) || message.author.bot) return;
 
   const { args, command } =  parseMessage(message, prefix)
