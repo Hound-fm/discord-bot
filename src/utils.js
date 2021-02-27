@@ -1,7 +1,3 @@
-const Chance = require("chance");
-
-const chance = new Chance();
-
 const odyseeLink = (url) => "https://odysee.com/" + url.replace(/#/g, ":");
 
 const parseMessage = (message, prefix) => {
@@ -13,15 +9,4 @@ const parseMessage = (message, prefix) => {
 const isBotMention = (client, message) =>
   message.mentions.users.get(client.user.id) != null;
 
-const getRandomItem = (list) => {
-  let item = null;
-  if (list && list.length > 1) {
-    const index = chance.integer({ min: 0, max: list.length - 1 });
-    item = list[index];
-  } else if (list.length === 1) {
-    item = list[0];
-  }
-  return item;
-};
-
-module.exports = { odyseeLink, parseMessage, getRandomItem, isBotMention };
+module.exports = { odyseeLink, parseMessage, isBotMention };
