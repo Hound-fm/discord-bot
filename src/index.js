@@ -1,22 +1,36 @@
 // Load config
 require('dotenv').config()
 
+const fetch = require('node-fetch');
+
 const Discord = require("discord.js");
 const client = new Discord.Client();
 
+// Import utils
+const {  odyseeLink, parseMessage, getRandomItem } = require("./utils.js");
 
 // Set the prefix
 let prefix = "!";
 
-client.on("message", (message) => {
+const HOUND_API = "https://api.hound.fm/"
+
+client.on("message", async (message) => {
   // Exit and stop if the prefix is not there or if user is a bot
   if (!message.content.startsWith(prefix) || message.author.bot) return;
 
-  if (message.content.startsWith(prefix + "ping")) {
-    message.channel.send("pong!");
-  } else
-  if (message.content.startsWith(prefix + "foo")) {
-    message.channel.send("bar!");
+  const { args, command } =  parseMessage(message, prefix)
+
+  if (command === "random" || command === "shuffle") {
+    let [genre] = args
+    genre = genre.replace(/-/g, ' ')
+    const params = !genre ? "" : "genre=" + genre
+    const res = await fetch(HOUND_API + "content/music?group=latest&" + params)
+    const data = await res.json()
+    const list = data.data.streams
+    const stream = getRandomItem(list)
+    if (stream && stream.cannonical_url) {
+       message.channel.send(odyseeLink(stream.cannonical_url))
+    }
   }
 });
 
