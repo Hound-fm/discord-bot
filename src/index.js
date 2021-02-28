@@ -14,8 +14,8 @@ const { odyseeLink, parseMessage, isBotMention } = require("./utils.js");
 // Discord client
 const client = new Discord.Client();
 
-const chance_group = new Chance("78jkseed");
-const chance_list = new Chance("92fhseed");
+const chance_group = new Chance();
+const chance_list = new Chance();
 
 let prefix = "!";
 
@@ -37,6 +37,12 @@ client.on("message", async (message) => {
     message.channel.send({ embed: EMBED.ABOUT });
   }
 
+  if (command === "pick") {
+    const emoji = "⭐";
+    const pool = await message.channel.send({ embed: EMBED.COMMUNITY_POOL });
+    pool.react(emoji);
+  }
+
   if (command === "random" || command === "shuffle") {
     // Get genre
     let [genre] = args;
@@ -51,7 +57,7 @@ client.on("message", async (message) => {
     if (list && list.length) {
       const stream = chance_list.pickone(list);
       if (stream && stream.cannonical_url) {
-        message.channel.send(odyseeLink(stream.cannonical_url));
+        message.channel.send({ embed: EMBED.STREAM(stream) });
       }
     }
   }
