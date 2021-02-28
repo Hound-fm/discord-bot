@@ -1,4 +1,16 @@
-const odyseeLink = (url) => "https://odysee.com/" + url.replace(/#/g, ":");
+const webLink = (host, url) => "https://" + host + "/" + url.replace(/#/g, ":");
+
+const getWebLinks = (cannonicalUrl, format = "url") => {
+  const hosts = ["lbry.tv", "odysee.com"];
+  if (format === "markdown") {
+    return hosts.map((host) => `[${host}](${webLink(host, cannonicalUrl)})`);
+  }
+  return hosts.map((host) => webLink(host, cannonicalUrl));
+};
+
+const getPublisherCannonicalUrl = (name, id, host) => {
+  return (host ? `https://${host}/` : "") + name + ":" + id[0];
+};
 
 const parseMessage = (message, prefix) => {
   const args = message.content.slice(prefix.length).trim().split(/ +/g);
@@ -43,10 +55,12 @@ const durationShortFormat = (seconds = 0) => {
 };
 
 module.exports = {
-  odyseeLink,
+  webLink,
+  getWebLinks,
   parseMessage,
   isBotMention,
   truncateText,
   formatGenres,
   durationShortFormat,
+  getPublisherCannonicalUrl,
 };

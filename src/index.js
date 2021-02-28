@@ -9,7 +9,7 @@ const Chance = require("chance");
 const Discord = require("discord.js");
 
 // Import utils
-const { odyseeLink, parseMessage, isBotMention } = require("./utils.js");
+const { parseMessage, isBotMention } = require("./utils.js");
 
 // Discord client
 const client = new Discord.Client();

@@ -1,7 +1,9 @@
 const {
+  getWebLinks,
   truncateText,
   formatGenres,
   durationShortFormat,
+  getPublisherCannonicalUrl,
 } = require("./utils.js");
 const { getThumbnailCdnUrl } = require("./cdn.js");
 
@@ -36,14 +38,20 @@ const STREAM = ({
   genres,
   description,
   thumbnail_url,
+  cannonical_url,
   audio_duration,
   publisher_title,
+  publisher_name,
+  publisher_id,
 }) => {
   return {
     color: 3447003,
     title: title || "Uknown",
     description: truncateText(description),
-    author: { name: publisher_title || "Uknown", url: "https://lbry.tv" },
+    author: {
+      name: publisher_title || "Uknown",
+      url: getPublisherCannonicalUrl(publisher_name, publisher_id, "lbry.tv"),
+    },
     thumbnail: { url: thumbnail_url },
     fields: [
       {
@@ -58,7 +66,7 @@ const STREAM = ({
       },
       {
         name: "Listen on",
-        value: "[LBRY.tv](https://lbry.tv)\n[Odysee.com](https://odysee.com)",
+        value: getWebLinks(cannonical_url, "markdown").join("\n"),
       },
     ],
   };
