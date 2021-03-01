@@ -15,7 +15,10 @@ const getPublisherCannonicalUrl = (name, id, host) => {
 const parseMessage = (message, prefix) => {
   const args = message.content.slice(prefix.length).trim().split(/ +/g);
   const command = args.shift().toLowerCase();
-  return { args, command };
+  // Single argument
+  const arg = args.join(" ");
+  // Return parsed message
+  return { arg, args, command };
 };
 
 const isBotMention = (client, message) =>

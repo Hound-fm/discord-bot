@@ -1,12 +1,15 @@
 // Load config
 require("dotenv").config();
 
+const search = require("./search.js");
+
 // Constants
 const EMBED = require("./embeds.js");
 
 const Hound = require("./api.js");
 const Chance = require("chance");
 const Discord = require("discord.js");
+const { CommunityPool } = require("./communityPicks.js");
 
 // Import utils
 const { parseMessage, isBotMention } = require("./utils.js");
@@ -27,7 +30,7 @@ client.on("message", async (message) => {
 
   if (!message.content.startsWith(prefix) || message.author.bot) return;
 
-  const { args, command } = parseMessage(message, prefix);
+  const { arg, args, command } = parseMessage(message, prefix);
 
   if (command === "help") {
     message.channel.send({ embed: EMBED.COMMAND_LIST });
@@ -38,9 +41,15 @@ client.on("message", async (message) => {
   }
 
   if (command === "pick") {
-    const emoji = "⭐";
-    const pool = await message.channel.send({ embed: EMBED.COMMUNITY_POOL });
-    pool.react(emoji);
+    CommunityPool(message);
+  }
+
+  if (command === "search") {
+    const test = await search(arg);
+    const target = test && test.length && test[0];
+    if (target && target.value) {
+      message.channel.send(target.value.title);
+    }
   }
 
   if (command === "random" || command === "shuffle") {

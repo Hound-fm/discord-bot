@@ -5,7 +5,6 @@ const {
   durationShortFormat,
   getPublisherCannonicalUrl,
 } = require("./utils.js");
-const { getThumbnailCdnUrl } = require("./cdn.js");
 
 const COMMAND_LIST = {
   color: 3447003,
