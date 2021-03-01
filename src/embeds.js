@@ -74,23 +74,28 @@ const STREAM = ({
 const test =
   "https://avatars.githubusercontent.com/u/75968706?s=400&u=82ad229b8f27975826369ce5944526245bc82d02&v=4";
 
-const COMMUNITY_POOL = {
+const COMMUNITY_POOL = (user, stream) => ({
   color: 3447003,
   title: ":sparkles: Community picks",
-  /*image: {
-		url: test,
-	}, */
-  description: ` Awesome content handpicked by Music hive: `,
+  thumbnail: { url: stream.thumbnail_url },
+  description: `Awesome content handpicked by ${user}`,
   fields: [
-    { name: "Song title", value: "By [channelName](https://odysee.com)" },
+    {
+      name: stream.title,
+      value: `By [${stream.publisher_title}](${getPublisherCanonicalUrl(
+        stream.publisher_name,
+        stream.publisher_id,
+        "lbry.tv"
+      )})`,
+    },
     {
       name: "Listen On",
-      value: "[Lbry.tv](https://lbry.tv) • [Odysee.com](https://odysee.com)",
+      value: getWebLinks(stream.cannonical_url, "markdown").join("\n"),
       inline: true,
     },
     { name: "Reactions", value: "React to vote (+3 needed to approve )" },
   ],
-};
+});
 
 module.exports = {
   ABOUT,

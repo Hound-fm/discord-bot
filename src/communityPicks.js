@@ -14,8 +14,10 @@ const ObserveReactions = (message, opts = { max: 5, time: 60 * 1000 }) => {
     });
 };
 
-module.exports.CommunityPool = async (message) => {
-  const pool = await message.channel.send({ embed: COMMUNITY_POOL });
+module.exports.CommunityPool = async (message, stream) => {
+  const pool = await message.channel.send({
+    embed: COMMUNITY_POOL(message.author.toString(), stream),
+  });
   // Initial reaction
   pool.react(emoji);
   // Observe users reactions

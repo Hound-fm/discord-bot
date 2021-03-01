@@ -41,14 +41,22 @@ client.on("message", async (message) => {
   }
 
   if (command === "pick") {
-    CommunityPool(message);
+    try {
+      const results = await search(arg);
+      if (results && results.length) {
+        const stream = results[0];
+        CommunityPool(message, stream);
+      }
+    } catch (error) {
+      console.log("error: ", error);
+    }
   }
 
   if (command === "search") {
     try {
       const results = await search(arg);
       if (results && results.length) {
-        const stream = results[0]
+        const stream = results[0];
         message.channel.send({ embed: EMBED.STREAM(stream) });
       }
     } catch (error) {
