@@ -34,9 +34,11 @@ const Scrapz = (claim) => {
 
   if (
     !stream.publisher_title ||
-    !stream.publisher_title.trim() === "" ||
+    stream.publisher_title.trim() === "" ||
     !stream.audio_duration ||
-    !stream.license
+    !stream.license ||
+    stream.license.trim() === "" ||
+    stream.license.toLowerCase().trim() === "none"
   ) {
     return;
   }

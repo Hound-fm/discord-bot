@@ -35,7 +35,7 @@ const parseURL = (url) => {
 };
 
 const LIGHTHOUSE_API =
-  "https://lighthouse.lbry.com/search?size=20&from=0&claimType=file&mediaType=audio,&nsfw=false&s=";
+  "https://lighthouse.lbry.com/search?size=50&from=0&claimType=file&mediaType=audio,&nsfw=false&s=";
 
 const lightHouseSearch = async (query) => {
   const url = LIGHTHOUSE_API + query;

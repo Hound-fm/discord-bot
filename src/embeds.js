@@ -89,6 +89,16 @@ const COMMUNITY_POOL = (user, stream) => ({
       )})`,
     },
     {
+      name: "Duration",
+      value: durationShortFormat(stream.audio_duration),
+      inline: true,
+    },
+    {
+      name: "Genres",
+      value: formatGenres(stream.genres),
+      inline: true,
+    },
+    {
       name: "Listen On",
       value: getWebLinks(stream.cannonical_url, "markdown").join("\n"),
       inline: true,

@@ -22,6 +22,18 @@ const chance_list = new Chance();
 
 let prefix = "!";
 
+
+const MESSAGE_STATUS = {
+  ERROR: "⚠️",
+  READY: "👍"
+}
+
+const setMessageStatus = (message, status) => {
+  if (status) {
+      message.react(status)
+    }
+}
+
 client.on("message", async (message) => {
   if (isBotMention(client, message)) {
     message.channel.send({ embed: EMBED.ABOUT });
@@ -34,10 +46,12 @@ client.on("message", async (message) => {
 
   if (command === "help") {
     message.channel.send({ embed: EMBED.COMMAND_LIST });
+    setMessageStatus(message, MESSAGE_STATUS.READY);
   }
 
   if (command === "about") {
     message.channel.send({ embed: EMBED.ABOUT });
+    setMessageStatus(message, MESSAGE_STATUS.READY);
   }
 
   if (command === "pick") {
@@ -45,10 +59,17 @@ client.on("message", async (message) => {
       const results = await search(arg);
       if (results && results.length) {
         const stream = results[0];
-        CommunityPool(message, stream);
+        if (stream) {
+          CommunityPool(message, stream);
+          setMessageStatus(message, MESSAGE_STATUS.READY);
+        } else {
+          setMessageStatus(message, MESSAGE_STATUS.ERROR);
+        }
+      } else {
+        setMessageStatus(message, MESSAGE_STATUS.ERROR);
       }
     } catch (error) {
-      console.log("error: ", error);
+      setMessageStatus(message, MESSAGE_STATUS.ERROR);
     }
   }
 
@@ -57,10 +78,17 @@ client.on("message", async (message) => {
       const results = await search(arg);
       if (results && results.length) {
         const stream = results[0];
-        message.channel.send({ embed: EMBED.STREAM(stream) });
+        if (stream) {
+          message.channel.send({ embed: EMBED.STREAM(stream) });
+          setMessageStatus(message, MESSAGE_STATUS.READY);
+        } else {
+          setMessageStatus(message, MESSAGE_STATUS.ERROR);
+        }
+      } else {
+        setMessageStatus(message, MESSAGE_STATUS.ERROR);
       }
     } catch (error) {
-      console.log("error: ", error);
+        setMessageStatus(message, MESSAGE_STATUS.ERROR);
     }
   }
 
