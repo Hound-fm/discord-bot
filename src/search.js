@@ -1,10 +1,8 @@
+const Fuse = require("fuse.js");
+const Scrapz = require("./scrapz.js");
 const fetch = require("node-fetch");
 const { lbryProxy } = require("./lbryProxy.js");
 const { parseURI, buildURI } = require("./lbryURI.js");
-
-const scrapz = (source) => {};
-
-//console.info(parseURI("lbry://#9191be934102d6870b3128aefc0e316d2e06f8cd"));
 
 const isHex = (str) => {
   const hex = /[0-9A-Fa-f]{6}/g;
@@ -30,17 +28,14 @@ const parseURL = (url) => {
     const parsed = new URL(url);
     const hosts = ["https://odysee.com", "https://lbry.tv"];
     if (hosts.includes(parsed.origin)) {
-      const cannonicalUrl = parsed.pathname.substring(1).replace(/:/g, "#");
-      return parseURI(cannonicalUrl);
+      const canonicalURL = parsed.pathname.substring(1).replace(/:/g, "#");
+      return parseURI(canonicalURL);
     }
   }
 };
 
-// lbryProxy('claim_search', {claim_id: "9191be934102d6870b3128aefc0e316d2e06f8cd" })
-// lbryProxy('resolve', { urls:  ['lbry://#9191be934102d6870b3128aefc0e316d2e06f8cd'] })
-
 const LIGHTHOUSE_API =
-  "https://lighthouse.lbry.com/search?size=3&from=0&claimType=file&mediaType=audio,&nsfw=false&s=";
+  "https://lighthouse.lbry.com/search?size=20&from=0&claimType=file&mediaType=audio,&nsfw=false&s=";
 
 const lightHouseSearch = async (query) => {
   const url = LIGHTHOUSE_API + query;
@@ -67,6 +62,27 @@ const formatSearchInput = (searchInput) => {
   return input;
 };
 
+const fuzzySearch = async (input) => {
+  let results;
+  // Query search
+  const items = await lightHouseSearch(input);
+  //
+  if (items && items.length) {
+    const urls = items.map((item) => item.name + "#" + item.claimId);
+    results = await lbryProxy("resolve", { urls });
+
+    if (results && results.length) {
+      // Fuzzy sort for results
+      const fuzzy = new Fuse(results, {
+        includeScore: true,
+        keys: ["value.title"],
+      });
+      results = fuzzy.search(input).map((res) => res.item);
+    }
+  }
+  return results;
+};
+
 const search = async (textInput) => {
   // Store results
   let results;
@@ -90,33 +106,33 @@ const search = async (textInput) => {
       // Sarch by claim_id
       if (claimId) {
         results = await lbryProxy("claim_search", { claim_id: claimId });
-      } else if (uri.streamName) {
+      } else if (
+        uri.streamName &&
+        (uri.streamClaimId || uri.channelClaimName)
+      ) {
         // Exact resolve
-        const {
-          streamName,
-          streamClaimId,
-          channelClaimId,
-          channelClaimName,
-        } = uri;
         const resolveURI = buildURI({
-          streamName,
-          streamClaimId,
-          channelClaimId,
-          channelClaimName,
+          streamName: uri.streamName,
+          streamClaimId: uri.streamClaimId,
+          channelClaimId: uri.channelClaimId,
+          channelClaimName: uri.channelClaimName,
         });
 
         results = await lbryProxy("resolve", { urls: [resolveURI] });
+      } else {
+        results = await fuzzySearch(uri.streamName);
       }
-    } catch (error) {}
-  } else {
-    // Query search
-    const items = await lightHouseSearch(input);
-    //
-    if (items && items.length) {
-      const urls = items.map((item) => item.name + "#" + item.claimId);
-      results = await lbryProxy("resolve", { urls });
+    } catch (error) {
+      console.info(error);
     }
+  } else {
+    results = await fuzzySearch(input);
   }
+
+  if (results && results.length) {
+    results = results.map((res) => Scrapz(res)).filter((item) => item != null);
+  }
+
   return results;
 };
 

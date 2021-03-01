@@ -45,10 +45,14 @@ client.on("message", async (message) => {
   }
 
   if (command === "search") {
-    const test = await search(arg);
-    const target = test && test.length && test[0];
-    if (target && target.value) {
-      message.channel.send(target.value.title);
+    try {
+      const results = await search(arg);
+      if (results && results.length) {
+        const stream = results[0]
+        message.channel.send({ embed: EMBED.STREAM(stream) });
+      }
+    } catch (error) {
+      console.log("error: ", error);
     }
   }
 
@@ -65,7 +69,7 @@ client.on("message", async (message) => {
     // Validate list
     if (list && list.length) {
       const stream = chance_list.pickone(list);
-      if (stream && stream.cannonical_url) {
+      if (stream && stream.cannonical_url && stream.publisher_title) {
         message.channel.send({ embed: EMBED.STREAM(stream) });
       }
     }

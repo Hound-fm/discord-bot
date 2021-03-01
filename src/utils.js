@@ -1,14 +1,14 @@
 const webLink = (host, url) => "https://" + host + "/" + url.replace(/#/g, ":");
 
-const getWebLinks = (cannonicalUrl, format = "url") => {
+const getWebLinks = (canonicalURL, format = "url") => {
   const hosts = ["lbry.tv", "odysee.com"];
   if (format === "markdown") {
-    return hosts.map((host) => `[${host}](${webLink(host, cannonicalUrl)})`);
+    return hosts.map((host) => `[${host}](${webLink(host, canonicalURL)})`);
   }
-  return hosts.map((host) => webLink(host, cannonicalUrl));
+  return hosts.map((host) => webLink(host, canonicalURL));
 };
 
-const getPublisherCannonicalUrl = (name, id, host) => {
+const getPublisherCanonicalUrl = (name, id, host) => {
   return (host ? `https://${host}/` : "") + name + ":" + id[0];
 };
 
@@ -65,5 +65,5 @@ module.exports = {
   truncateText,
   formatGenres,
   durationShortFormat,
-  getPublisherCannonicalUrl,
+  getPublisherCanonicalUrl,
 };

@@ -3,7 +3,7 @@ const {
   truncateText,
   formatGenres,
   durationShortFormat,
-  getPublisherCannonicalUrl,
+  getPublisherCanonicalUrl,
 } = require("./utils.js");
 
 const COMMAND_LIST = {
@@ -49,7 +49,7 @@ const STREAM = ({
     description: truncateText(description),
     author: {
       name: publisher_title || "Uknown",
-      url: getPublisherCannonicalUrl(publisher_name, publisher_id, "lbry.tv"),
+      url: getPublisherCanonicalUrl(publisher_name, publisher_id, "lbry.tv"),
     },
     thumbnail: { url: thumbnail_url },
     fields: [

@@ -11,10 +11,13 @@
     "format": "npx -p prettier@latest -p pretty-quick pretty-quick"
   },
   "dependencies": {
+    "add": "^2.0.6",
     "chance": "^1.1.7",
     "discord.js": "^12.5.1",
     "dotenv": "^8.2.0",
     "fetch-node": "^0.0.1",
-    "luxon": "^1.26.0"
+    "fuse.js": "^6.4.6",
+    "luxon": "^1.26.0",
+    "yarn": "^1.22.10"
   }
 }

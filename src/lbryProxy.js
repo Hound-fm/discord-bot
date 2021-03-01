@@ -5,6 +5,7 @@ module.exports.lbryProxy = async (method, params) => {
   const body = {
     method,
     params,
+    id: Date.now(),
     jsonrpc: "2.0",
   };
 
@@ -14,6 +15,11 @@ module.exports.lbryProxy = async (method, params) => {
     headers: { "Content-Type": "application/json" },
   }).then(async (res) => {
     const data = await res.json();
+
+    if (data.error || !data.result) {
+      console.error(data)
+      return;
+    }
     if (method === "resolve") {
       const results = Object.values(data.result);
       return results;
