@@ -1,3 +1,6 @@
+const remark = require("remark");
+const strip = require("strip-markdown");
+
 const {
   getWebLinks,
   truncateText,
@@ -32,6 +35,15 @@ const ABOUT = {
   `,
 };
 
+const formatDescription = (description) => {
+  try {
+    const str = remark().use(strip).processSync(description).toString();
+    return truncateText(str);
+  } catch (error) {
+    console.info(error);
+  }
+};
+
 const STREAM = ({
   title,
   genres,
@@ -46,7 +58,7 @@ const STREAM = ({
   return {
     color: 3447003,
     title: title || "Uknown",
-    description: truncateText(description),
+    description: formatDescription(description),
     author: {
       name: publisher_title || "Uknown",
       url: getPublisherCanonicalUrl(publisher_name, publisher_id, "lbry.tv"),
