@@ -8,6 +8,10 @@ const getWebLinks = (canonicalURL, format = "url") => {
   return hosts.map((host) => webLink(host, canonicalURL));
 };
 
+const getStreamLink = ({ name, id }) => {
+  return `https://lbry.tv/$/download/${name}/${id}`;
+};
+
 const getPublisherCanonicalUrl = (name, id, host) => {
   return (host ? `https://${host}/` : "") + name + ":" + id[0];
 };
@@ -66,6 +70,7 @@ const setMessageStatus = (message, status) => {
 module.exports = {
   webLink,
   getWebLinks,
+  getStreamLink,
   parseMessage,
   isBotMention,
   truncateText,

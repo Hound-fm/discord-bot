@@ -1,8 +1,5 @@
 // Load config
 require("dotenv").config();
-
-const search = require("./search.js");
-
 // Constants
 const EMBED = require("./embeds.js");
 const { MESSAGE_STATUS } = require("./constants.js");
@@ -10,6 +7,7 @@ const Hound = require("./api.js");
 const Chance = require("chance");
 const Discord = require("discord.js");
 const VoiceStream = require("./voiceStream.js");
+const search = require("./search.js");
 const { CommunityPool } = require("./communityPicks.js");
 
 // Import utils
@@ -22,6 +20,20 @@ const chance_group = new Chance();
 const chance_list = new Chance();
 
 let prefix = "!";
+
+const setActivity = (type, name) => {
+  // Set the client user's activity
+  client.user
+    .setActivity(name, { type })
+    .then((presence) =>
+      console.log(`Activity set to ${presence.activities[0].name}`)
+    )
+    .catch(console.error);
+};
+
+client.on("ready", (message) => {
+  setActivity("LISTENING", "@hound.fm");
+});
 
 client.on("message", async (message) => {
   if (isBotMention(client, message)) {
@@ -44,7 +56,28 @@ client.on("message", async (message) => {
   }
 
   if (command === "play") {
-    VoiceStream.test(message);
+    const searchQuery = arg.trim();
+    if (searchQuery && searchQuery.length >= 3) {
+      VoiceStream.play(message, searchQuery);
+    } else {
+      setMessageStatus(message, MESSAGE_STATUS.ERROR);
+    }
+  }
+
+  if (command === "pause") {
+    VoiceStream.pause(message);
+  }
+
+  if (command === "resume") {
+    VoiceStream.resume(message);
+  }
+
+  if (command === "skip") {
+    VoiceStream.skip(message);
+  }
+
+  if (command === "stop" || command === "disconnect") {
+    VoiceStream.stop(message);
   }
 
   if (command === "pick") {
@@ -100,7 +133,12 @@ client.on("message", async (message) => {
       const stream = chance_list.pickone(list);
       if (stream && stream.cannonical_url && stream.publisher_title) {
         message.channel.send({ embed: EMBED.STREAM(stream) });
+        setMessageStatus(message, MESSAGE_STATUS.READY);
+      } else {
+        setMessageStatus(message, MESSAGE_STATUS.ERROR);
       }
+    } else {
+      setMessageStatus(message, MESSAGE_STATUS.ERROR);
     }
   }
 });

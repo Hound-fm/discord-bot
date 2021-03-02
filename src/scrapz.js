@@ -9,6 +9,8 @@ const Scrapz = (claim) => {
   const media = metadata.audio || metadata.video;
 
   // Mapp data to stream
+  stream.id = claim.claim_id;
+  stream.name = claim.name;
   stream.title = metadata.title;
   stream.license = metadata.license;
   stream.description = metadata.description;
