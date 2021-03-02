@@ -57,6 +57,12 @@ const durationShortFormat = (seconds = 0) => {
   return formated + " " + (formated === 1 ? "sec" : "secs");
 };
 
+const setMessageStatus = (message, status) => {
+  if (status) {
+    message.react(status);
+  }
+};
+
 module.exports = {
   webLink,
   getWebLinks,
@@ -64,6 +70,7 @@ module.exports = {
   isBotMention,
   truncateText,
   formatGenres,
+  setMessageStatus,
   durationShortFormat,
   getPublisherCanonicalUrl,
 };

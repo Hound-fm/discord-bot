@@ -5,14 +5,15 @@ const search = require("./search.js");
 
 // Constants
 const EMBED = require("./embeds.js");
-
+const { MESSAGE_STATUS } = require("./constants.js");
 const Hound = require("./api.js");
 const Chance = require("chance");
 const Discord = require("discord.js");
+const VoiceStream = require("./voiceStream.js");
 const { CommunityPool } = require("./communityPicks.js");
 
 // Import utils
-const { parseMessage, isBotMention } = require("./utils.js");
+const { parseMessage, isBotMention, setMessageStatus } = require("./utils.js");
 
 // Discord client
 const client = new Discord.Client();
@@ -21,18 +22,6 @@ const chance_group = new Chance();
 const chance_list = new Chance();
 
 let prefix = "!";
-
-
-const MESSAGE_STATUS = {
-  ERROR: "⚠️",
-  READY: "👍"
-}
-
-const setMessageStatus = (message, status) => {
-  if (status) {
-      message.react(status)
-    }
-}
 
 client.on("message", async (message) => {
   if (isBotMention(client, message)) {
@@ -52,6 +41,10 @@ client.on("message", async (message) => {
   if (command === "about") {
     message.channel.send({ embed: EMBED.ABOUT });
     setMessageStatus(message, MESSAGE_STATUS.READY);
+  }
+
+  if (command === "play") {
+    VoiceStream.test(message);
   }
 
   if (command === "pick") {
@@ -88,7 +81,7 @@ client.on("message", async (message) => {
         setMessageStatus(message, MESSAGE_STATUS.ERROR);
       }
     } catch (error) {
-        setMessageStatus(message, MESSAGE_STATUS.ERROR);
+      setMessageStatus(message, MESSAGE_STATUS.ERROR);
     }
   }
 
