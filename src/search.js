@@ -104,7 +104,7 @@ const search = async (textInput) => {
         results = await fuzzySearch(uri.streamName);
       }
     } catch (error) {
-      console.info(error);
+      console.error(error);
     }
   } else {
     results = await fuzzySearch(input);
@@ -136,7 +136,7 @@ const searchBestResult = async (message, searchQuery) => {
       return;
     }
   } catch (error) {
-    console.info(error);
+    console.error(error);
     ErrorHandler.sendError(message, ErrorHandler.ERRORS.EMPTY_SEARCH);
     return;
   }

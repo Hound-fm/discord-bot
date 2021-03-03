@@ -106,7 +106,7 @@ const test =
   "https://avatars.githubusercontent.com/u/75968706?s=400&u=82ad229b8f27975826369ce5944526245bc82d02&v=4";
 
 const COMMUNITY_POOL = (user, stream) => ({
-  color: 3447003,
+  color: STREAM_COLORS[stream.stream_type] || STREAM_COLORS.DEFAULT,
   title: ":sparkles: Community picks",
   thumbnail: { url: stream.thumbnail_url },
   description: `Awesome content handpicked by ${user}`,
@@ -118,6 +118,11 @@ const COMMUNITY_POOL = (user, stream) => ({
         stream.publisher_id,
         "lbry.tv"
       )})`,
+    },
+    {
+      name: "Category",
+      value: stream.stream_type ? formatTitle(stream.stream_type) : "Uknown",
+      inline: true,
     },
     {
       name: "Duration",
@@ -132,7 +137,6 @@ const COMMUNITY_POOL = (user, stream) => ({
     {
       name: "Listen On",
       value: getWebLinks(stream.cannonical_url, "markdown").join("\n"),
-      inline: true,
     },
     { name: "Reactions", value: "React to vote (+3 needed to approve )" },
   ],
