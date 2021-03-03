@@ -23,7 +23,6 @@ const parseMessage = (message = { content: "" }, prefixes) => {
   // Find command prefix
   if (textInput && textInput.length) {
     parsed.prefix = prefixes.find((prefix) => prefix === textInput[0]);
-    console.info(parsed.prefix);
   }
   if (textInput === "" || !parsed.prefix) {
     return parsed;
@@ -43,13 +42,15 @@ const truncateText = (str = "", limit = 40) => {
   return str.trim().substring(0, limit) + "...";
 };
 
+const formatTitle = (str = "") => {
+  return str[0].toUpperCase() + str.substr(1);
+};
+
 const formatGenres = (genres) => {
   if (!genres || !genres.length) {
     return "Uknown";
   }
-  return genres
-    .map((genre) => genre[0].toUpperCase() + genre.substr(1))
-    .join(", ");
+  return genres.map((genre) => formatTitle(genre)).join(", ");
 };
 
 const { Duration } = require("luxon");
@@ -119,6 +120,7 @@ module.exports = {
   parseMessage,
   isBotMention,
   truncateText,
+  formatTitle,
   formatGenres,
   setMessageStatus,
   durationShortFormat,

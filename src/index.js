@@ -106,7 +106,6 @@ client.on("message", async (message) => {
     if (list && list.length) {
       const shuffled_1 = chance_list.shuffle(list);
       const stream = shuffled[0];
-      console.info(chance_list.d10(), group);
 
       if (stream && stream.cannonical_url && stream.publisher_title) {
         message.channel.send({ embed: EMBED.STREAM(stream) });

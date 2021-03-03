@@ -111,7 +111,8 @@ const search = async (textInput) => {
   }
 
   if (results && results.length) {
-    results = results.map((res) => Scrapz(res)).filter((item) => item != null);
+    results = await Promise.all(results.map(async (i) => Scrapz(i)));
+    results = results.filter((item) => item != null);
   }
 
   return results;

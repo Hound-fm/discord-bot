@@ -4,6 +4,7 @@ const strip = require("strip-markdown");
 const {
   getWebLinks,
   truncateText,
+  formatTitle,
   formatGenres,
   durationShortFormat,
   getPublisherCanonicalUrl,
@@ -45,8 +46,15 @@ const formatDescription = (description) => {
     const str = remark().use(strip).processSync(description).toString();
     return truncateText(str);
   } catch (error) {
-    console.info(error);
+    console.error(error);
   }
+};
+
+const STREAM_COLORS = {
+  music: 3447003,
+  podcast: 10181046,
+  audiobook: 1752220,
+  DEFAULT: 9807270,
 };
 
 const STREAM = ({
@@ -59,9 +67,10 @@ const STREAM = ({
   publisher_title,
   publisher_name,
   publisher_id,
+  stream_type,
 }) => {
   return {
-    color: 3447003,
+    color: STREAM_COLORS[stream_type] || STREAM_COLORS.DEFAULT,
     title: title || "Uknown",
     description: formatDescription(description),
     author: {
@@ -70,6 +79,11 @@ const STREAM = ({
     },
     thumbnail: { url: thumbnail_url },
     fields: [
+      {
+        name: "Category",
+        value: stream_type ? formatTitle(stream_type) : "Uknown",
+        inline: true,
+      },
       {
         name: "Duration",
         value: durationShortFormat(audio_duration),
