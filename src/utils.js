@@ -62,7 +62,7 @@ const durationShortFormat = (seconds = 0) => {
 };
 
 const setMessageStatus = (message, status) => {
-  if (status) {
+  if (status && message && message.react) {
     message.react(status);
   }
 };

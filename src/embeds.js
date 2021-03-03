@@ -20,6 +20,11 @@ const COMMAND_LIST = {
   `,
 };
 
+const ERROR = (message) => ({
+  color: 15158332,
+  description: message,
+});
+
 const ABOUT = {
   color: 3447003,
   title: "Hound.fm",
@@ -27,7 +32,7 @@ const ABOUT = {
   A simple audio content aggregator for lbry.
 
   **Command list**
-  Type \`!help\` to see a full list of commands.
+  Type \`~help\` to see a full list of commands.
 
   **Support**
   Help development with a small donation (LBC):
@@ -121,6 +126,7 @@ const COMMUNITY_POOL = (user, stream) => ({
 
 module.exports = {
   ABOUT,
+  ERROR,
   STREAM,
   COMMAND_LIST,
   COMMUNITY_POOL,

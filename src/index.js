@@ -19,7 +19,7 @@ const client = new Discord.Client();
 const chance_group = new Chance();
 const chance_list = new Chance();
 
-let prefix = "!";
+let prefix = "~";
 
 const setActivity = (type, name) => {
   // Set the client user's activity
@@ -57,11 +57,7 @@ client.on("message", async (message) => {
 
   if (command === "play") {
     const searchQuery = arg.trim();
-    if (searchQuery && searchQuery.length >= 3) {
-      VoiceStream.play(message, searchQuery);
-    } else {
-      setMessageStatus(message, MESSAGE_STATUS.ERROR);
-    }
+    VoiceStream.play(message, searchQuery);
   }
 
   if (command === "pause") {
@@ -130,7 +126,10 @@ client.on("message", async (message) => {
     const list = await Hound.getStreams(genre, group);
     // Validate list
     if (list && list.length) {
-      const stream = chance_list.pickone(list);
+      const shuffled_1 = chance_list.shuffle(list);
+      const stream = shuffled[0];
+      console.info(chance_list.d10(), group);
+
       if (stream && stream.cannonical_url && stream.publisher_title) {
         message.channel.send({ embed: EMBED.STREAM(stream) });
         setMessageStatus(message, MESSAGE_STATUS.READY);
@@ -139,6 +138,62 @@ client.on("message", async (message) => {
       }
     } else {
       setMessageStatus(message, MESSAGE_STATUS.ERROR);
+    }
+  }
+});
+
+const handleInteraction = async (interaction, output) => {
+  await client.api
+    .interactions(interaction.id, interaction.token)
+    .callback.post({ data: { type: 5 } });
+};
+
+const handlePlayerActions = async (interaction, action) => {
+  // Map message data:
+  // Compatibility with message commands and slash commands:
+  const message = {};
+  message.channel = await client.channels.fetch(interaction.channel_id);
+  message.guild = await client.guilds.fetch(interaction.guild_id);
+  message.member = await message.guild.members.fetch(
+    interaction.member.user.id
+  );
+  message.client = client;
+  // Comamnd name
+  const command = action.name;
+  const args = action.options;
+  const arg = args ? args[0].value : null;
+  // Aknowledge interaction
+  await handleInteraction(interaction, command);
+
+  if (command === "play") {
+    const searchQuery = arg.trim();
+    VoiceStream.play(message, searchQuery);
+  }
+
+  if (command === "pause") {
+    VoiceStream.pause(message);
+  }
+
+  if (command === "resume") {
+    VoiceStream.resume(message);
+  }
+
+  if (command === "skip") {
+    VoiceStream.skip(message);
+  }
+
+  if (command === "stop" || command === "disconnect") {
+    VoiceStream.stop(message);
+  }
+};
+
+client.ws.on("INTERACTION_CREATE", async (interaction) => {
+  const { data } = interaction;
+  if (data.name === "player") {
+    const command = data.options[0];
+    if (command.name === "action") {
+      const action = command.options[0];
+      handlePlayerActions(interaction, action);
     }
   }
 });

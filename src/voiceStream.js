@@ -1,6 +1,7 @@
 // Constants
 const search = require("./search.js");
 const EMBED = require("./embeds.js");
+const ErrorHandler = require("./errors.js");
 const { MESSAGE_STATUS } = require("./constants.js");
 // Import utils
 const { getStreamLink, setMessageStatus } = require("./utils.js");
@@ -70,17 +71,13 @@ const voiceChannelAction = (message, action) => {
   const serverQueue = getServerQueue(message);
 
   if (!message.member.voice.channel) {
-    message.channel.send(
-      "You have to be in a voice channel to stop the music!"
+    ErrorHandler.sendError(
+      message,
+      ErrorHandler.ERRORS.VOICE_CHANNEL_CONNECTION
     );
-    error = true;
+    return;
   } else if (!serverQueue || !serverQueue.connection) {
-    // message.channel.send("There is no song that I could skip!");
-    error = true;
-  }
-
-  if (error) {
-    setMessageStatus(message, MESSAGE_STATUS.ERROR);
+    ErrorHandler.sendError(message, ErrorHandler.ERRORS.EMPTY_QUEUE);
     return;
   }
 
@@ -144,28 +141,24 @@ module.exports.play = async (message, searchQuery) => {
     try {
       const results = await search(searchQuery);
       if (results && results.length) {
-        const stream = results[0];
-        if (stream) {
-          const metadata = stream;
-          const source = getStreamLink(stream);
-          message.channel.send({ embed: EMBED.STREAM(stream) });
-          serverQueue.streams.push({ metadata, source });
-        } else {
-          setMessageStatus(message, MESSAGE_STATUS.ERROR);
-        }
+        const metadata = results[0];
+        const source = getStreamLink(metadata);
+        message.channel.send({ embed: EMBED.STREAM(metadata) });
+        serverQueue.streams.push({ metadata, source });
+        // New stream Added to queue
+        setMessageStatus(message, MESSAGE_STATUS.READY);
       } else {
-        setMessageStatus(message, MESSAGE_STATUS.ERROR);
+        ErrorHandler.sendError(message, ErrorHandler.ERRORS.EMPTY_SEARCH);
+        return;
       }
     } catch (error) {
-      setMessageStatus(message, MESSAGE_STATUS.ERROR);
+      ErrorHandler.sendError(message, ErrorHandler.ERRORS.EMPTY_SEARCH);
+      return;
     }
     // serverQueue.streams.push(song);
     // Join voice channel
     if (!serverQueue.connection) {
       await connect(serverQueue);
-      setMessageStatus(message, MESSAGE_STATUS.READY);
-    } else {
-      // Item was added to queue
       setMessageStatus(message, MESSAGE_STATUS.READY);
     }
   }
