@@ -7,7 +7,7 @@ const Hound = require("./api.js");
 const Chance = require("chance");
 const Discord = require("discord.js");
 const VoiceStream = require("./voiceStream.js");
-const search = require("./search.js");
+const { searchBestResult } = require("./search.js");
 const { CommunityPool } = require("./communityPicks.js");
 
 // Import utils
@@ -77,40 +77,16 @@ client.on("message", async (message) => {
   }
 
   if (command === "pick") {
-    try {
-      const results = await search(arg);
-      if (results && results.length) {
-        const stream = results[0];
-        if (stream) {
-          CommunityPool(message, stream);
-          setMessageStatus(message, MESSAGE_STATUS.READY);
-        } else {
-          setMessageStatus(message, MESSAGE_STATUS.ERROR);
-        }
-      } else {
-        setMessageStatus(message, MESSAGE_STATUS.ERROR);
-      }
-    } catch (error) {
-      setMessageStatus(message, MESSAGE_STATUS.ERROR);
+    const stream = await searchBestResult(message, arg);
+    if (stream) {
+      CommunityPool(message, stream);
     }
   }
 
   if (command === "search") {
-    try {
-      const results = await search(arg);
-      if (results && results.length) {
-        const stream = results[0];
-        if (stream) {
-          message.channel.send({ embed: EMBED.STREAM(stream) });
-          setMessageStatus(message, MESSAGE_STATUS.READY);
-        } else {
-          setMessageStatus(message, MESSAGE_STATUS.ERROR);
-        }
-      } else {
-        setMessageStatus(message, MESSAGE_STATUS.ERROR);
-      }
-    } catch (error) {
-      setMessageStatus(message, MESSAGE_STATUS.ERROR);
+    const stream = await searchBestResult(message, arg);
+    if (stream) {
+      message.channel.send({ embed: EMBED.STREAM(stream) });
     }
   }
 

@@ -1,5 +1,5 @@
 // Constants
-const search = require("./search.js");
+const { searchBestResult } = require("./search.js");
 const EMBED = require("./embeds.js");
 const ErrorHandler = require("./errors.js");
 const { MESSAGE_STATUS } = require("./constants.js");
@@ -140,28 +140,17 @@ module.exports.play = async (message, searchQuery) => {
 
   if (serverQueue) {
     // Add stream to queue
-    try {
-      const results = await search(searchQuery);
-      if (results && results.length) {
-        const metadata = results[0];
-        const source = getStreamLink(metadata);
-        message.channel.send({ embed: EMBED.STREAM(metadata) });
-        serverQueue.streams.push({ metadata, source });
-        // New stream Added to queue
-        setMessageStatus(message, MESSAGE_STATUS.READY);
-      } else {
-        ErrorHandler.sendError(message, ErrorHandler.ERRORS.EMPTY_SEARCH);
-        return;
-      }
-    } catch (error) {
-      ErrorHandler.sendError(message, ErrorHandler.ERRORS.EMPTY_SEARCH);
-      return;
+    const metadata = await searchBestResult(message, searchQuery);
+    if (metadata) {
+      const source = getStreamLink(metadata);
+      message.channel.send({ embed: EMBED.STREAM(metadata) });
+      serverQueue.streams.push({ metadata, source });
     }
-    // serverQueue.streams.push(song);
-    // Join voice channel
-    if (!serverQueue.connection) {
-      await connect(serverQueue);
-      setMessageStatus(message, MESSAGE_STATUS.READY);
-    }
+  }
+  // serverQueue.streams.push(song);
+  // Join voice channel
+  if (!serverQueue.connection) {
+    await connect(serverQueue);
+    setMessageStatus(message, MESSAGE_STATUS.READY);
   }
 };

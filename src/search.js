@@ -1,38 +1,19 @@
 const Fuse = require("fuse.js");
 const Scrapz = require("./scrapz.js");
+const ErrorHandler = require("./errors.js");
 const fetch = require("node-fetch");
+
+const { MESSAGE_STATUS } = require("./constants.js");
 const { lbryProxy } = require("./lbryProxy.js");
 const { parseURI, buildURI } = require("./lbryURI.js");
-
-const isHex = (str) => {
-  const hex = /[0-9A-Fa-f]{6}/g;
-  return hex.test(str);
-};
-
-const isClaimID = (str) => str.length === 40 && isHex(str);
-
-const getClaimId = (uri) => {
-  const id = uri.streamClaimId || uri.claimId;
-  if (id && isClaimID(id)) {
-    return id;
-  }
-  if (uri.path && isClaimID(uri.path)) {
-    return uri.path;
-  }
-  return null;
-};
-
-// Web platforms
-const parseURL = (url) => {
-  if (url.startsWith("https://")) {
-    const parsed = new URL(url);
-    const hosts = ["https://odysee.com", "https://lbry.tv"];
-    if (hosts.includes(parsed.origin)) {
-      const canonicalURL = parsed.pathname.substring(1).replace(/:/g, "#");
-      return parseURI(canonicalURL);
-    }
-  }
-};
+// Import utils
+const {
+  isHex,
+  isClaimID,
+  getClaimId,
+  parseURL,
+  setMessageStatus,
+} = require("./utils.js");
 
 const LIGHTHOUSE_API =
   "https://lighthouse.lbry.com/search?size=25&from=0&claimType=file&mediaType=audio,&nsfw=false&s=";
@@ -136,4 +117,28 @@ const search = async (textInput) => {
   return results;
 };
 
-module.exports = search;
+const searchBestResult = async (message, searchQuery) => {
+  try {
+    if (!searchQuery || !searchQuery.length || searchQuery.length < 3) {
+      ErrorHandler.sendError(message, ErrorHandler.ERRORS.EMPTY_SEARCH);
+      return;
+    }
+
+    const results = await search(searchQuery);
+
+    if (results && results.length) {
+      const metadata = results[0];
+      setMessageStatus(message, MESSAGE_STATUS.READY);
+      return metadata;
+    } else {
+      ErrorHandler.sendError(message, ErrorHandler.ERRORS.EMPTY_SEARCH);
+      return;
+    }
+  } catch (error) {
+    console.info(error);
+    ErrorHandler.sendError(message, ErrorHandler.ERRORS.EMPTY_SEARCH);
+    return;
+  }
+};
+
+module.exports = { search, searchBestResult };

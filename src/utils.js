@@ -67,7 +67,41 @@ const setMessageStatus = (message, status) => {
   }
 };
 
+const isHex = (str) => {
+  const hex = /[0-9A-Fa-f]{6}/g;
+  return hex.test(str);
+};
+
+const isClaimID = (str) => str.length === 40 && isHex(str);
+
+const getClaimId = (uri) => {
+  const id = uri.streamClaimId || uri.claimId;
+  if (id && isClaimID(id)) {
+    return id;
+  }
+  if (uri.path && isClaimID(uri.path)) {
+    return uri.path;
+  }
+  return null;
+};
+
+// Web platforms
+const parseURL = (url) => {
+  if (url.startsWith("https://")) {
+    const parsed = new URL(url);
+    const hosts = ["https://odysee.com", "https://lbry.tv"];
+    if (hosts.includes(parsed.origin)) {
+      const canonicalURL = parsed.pathname.substring(1).replace(/:/g, "#");
+      return parseURI(canonicalURL);
+    }
+  }
+};
+
 module.exports = {
+  isHex,
+  isClaimID,
+  parseURL,
+  getClaimId,
   webLink,
   getWebLinks,
   getStreamLink,

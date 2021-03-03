@@ -9,7 +9,7 @@ const ERRORS = {
   VOICE_CHANNEL_PERMISSION:
     "I need the permissions to join and speak in your voice channel.",
   VOICE_CHANNEL_CONNECTION:
-    "You need to join a voice channel before you can use this command",
+    "You need to join a voice channel before you can use this command.",
 };
 
 module.exports.ERRORS = ERRORS;
