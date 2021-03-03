@@ -36,7 +36,6 @@ async function main() {
     },
   });
   const json = await response.json();
-
   console.info(json);
 }
 

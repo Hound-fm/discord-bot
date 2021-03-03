@@ -117,15 +117,17 @@ module.exports.stop = (message) => {
 module.exports.play = async (message, searchQuery) => {
   const voiceChannel = message.member.voice.channel;
   if (!voiceChannel) {
-    setMessageStatus(message, MESSAGE_STATUS.ERROR);
-    message.channel.send("You need to be in a voice channel to play music!");
+    ErrorHandler.sendError(
+      message,
+      ErrorHandler.ERRORS.VOICE_CHANNEL_CONNECTION
+    );
     return;
   }
   const permissions = voiceChannel.permissionsFor(message.client.user);
   if (!permissions.has("CONNECT") || !permissions.has("SPEAK")) {
-    setMessageStatus(message, MESSAGE_STATUS.ERROR);
-    message.channel.send(
-      "I need the permissions to join and speak in your voice channel!"
+    ErrorHandler.sendError(
+      message,
+      ErrorHandler.ERRORS.VOICE_CHANNEL_PERMISSION
     );
     return;
   }
