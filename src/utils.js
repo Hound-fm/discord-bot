@@ -16,13 +16,24 @@ const getPublisherCanonicalUrl = (name, id, host) => {
   return (host ? `https://${host}/` : "") + name + ":" + id[0];
 };
 
-const parseMessage = (message, prefix) => {
-  const args = message.content.slice(prefix.length).trim().split(/ +/g);
-  const command = args.shift().toLowerCase();
+const parseMessage = (message = { content: "" }, prefixes) => {
+  const parsed = { arg: null, args: null, command: null, prefix: null };
+  // Format message
+  const textInput = message.content.trim();
+  // Find command prefix
+  if (textInput && textInput.length) {
+    parsed.prefix = prefixes.find((prefix) => prefix === textInput[0]);
+    console.info(parsed.prefix);
+  }
+  if (textInput === "" || !parsed.prefix) {
+    return parsed;
+  }
+  parsed.args = message.content.slice(parsed.prefix.length).trim().split(/ +/g);
+  parsed.command = parsed.args.shift().toLowerCase();
   // Single argument
-  const arg = args.join(" ");
+  parsed.arg = parsed.args.join(" ");
   // Return parsed message
-  return { arg, args, command };
+  return parsed;
 };
 
 const isBotMention = (client, message) =>
@@ -48,17 +59,17 @@ const durationShortFormat = (seconds = 0) => {
 
   const hours = duration.as("hours");
   if (hours >= 1) {
-    const formated = hours.toFixed();
-    return formated + " " + (formated === 1 ? "hr" : "hrs");
+    const formated = hours.toFixed(1).replace(/.0|.1/, "");
+    return formated + " " + (formated === "1" ? "hr" : "hrs");
   }
 
   const minutes = duration.as("minutes");
   if (minutes >= 1) {
-    const formated = minutes.toFixed();
-    return formated + " " + (formated === 1 ? "min" : "mins");
+    let formated = minutes.toFixed(1).replace(/.0|.1/, "");
+    return formated + " " + (formated === "1" ? "min" : "mins");
   }
-  const formated = seconds.toFixed();
-  return formated + " " + (formated === 1 ? "sec" : "secs");
+  const formated = seconds.toFixed(1).replace(/.0|.1/, "");
+  return formated + " " + (formated === "1" ? "sec" : "secs");
 };
 
 const setMessageStatus = (message, status) => {

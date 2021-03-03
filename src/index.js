@@ -19,7 +19,8 @@ const client = new Discord.Client();
 const chance_group = new Chance();
 const chance_list = new Chance();
 
-let prefix = "~";
+// The dot prefix is intended for  mobile users
+let prefixes = [".", "~"];
 
 const setActivity = (type, name) => {
   // Set the client user's activity
@@ -41,9 +42,10 @@ client.on("message", async (message) => {
     return;
   }
 
-  if (!message.content.startsWith(prefix) || message.author.bot) return;
+  const { arg, args, command, prefix } = parseMessage(message, prefixes);
 
-  const { arg, args, command } = parseMessage(message, prefix);
+  // Ignore normal messages and other bots
+  if (!prefix || !command || message.author.bot) return;
 
   if (command === "help") {
     message.channel.send({ embed: EMBED.COMMAND_LIST });
