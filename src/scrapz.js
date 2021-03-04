@@ -1,7 +1,13 @@
 // Micro version of Scrapz in javascript
 const Scrapz = (claim) => {
   // Quick filters
-  if (!claim || !claim.signing_channel) {
+  if (
+    !claim ||
+    !claim.signing_channel ||
+    claim.value_type !== "stream" ||
+    !claim.value ||
+    claim.value.stream_type !== "audio"
+  ) {
     return;
   }
   const stream = { genres: [] };
@@ -15,6 +21,14 @@ const Scrapz = (claim) => {
   stream.title = metadata.title;
   stream.license = metadata.license;
   stream.description = metadata.description;
+  stream.fee = metadata.fee;
+
+  // Explicit / NSFW filters
+  const query = stream.title.toLowerCase();
+  const explicit = query.search(/nsfw|mature|explicit/);
+  if (explicit != -1) {
+    return;
+  }
 
   // Map media
   if (media) {

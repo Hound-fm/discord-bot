@@ -140,11 +140,16 @@ module.exports.play = async (message, searchQuery) => {
 
   if (serverQueue) {
     // Add stream to queue
-    const metadata = await searchBestResult(message, searchQuery);
+    const metadata = await searchBestResult(message, searchQuery, {
+      free_only: true,
+    });
     if (metadata) {
       const source = getStreamLink(metadata);
       message.channel.send({ embed: EMBED.STREAM(metadata) });
       serverQueue.streams.push({ metadata, source });
+    } else {
+      // Nothing to add in queue
+      return;
     }
   }
   // serverQueue.streams.push(song);
