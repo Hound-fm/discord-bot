@@ -60,7 +60,10 @@ const fuzzySearch = async (input, searchOptions) => {
         // Fuzzy sort for results
         const fuzzy = new Fuse(results, {
           includeScore: true,
-          keys: ["value.title"],
+          keys: [
+            { name: "value.title" },
+            { name: "signing_channel.value.title" },
+          ],
         });
         results = fuzzy.search(input);
         results = results

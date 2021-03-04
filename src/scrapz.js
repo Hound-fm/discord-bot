@@ -1,3 +1,58 @@
+// Scrapz utils
+const findCategory = (title, tags, description) => {
+  let categories = [];
+  let titleKeywords;
+  let tagsKeywords;
+  let descriptionKeywords;
+  let category;
+
+  if (title && title.length >= 5) {
+    titleKeywords = title
+      .toLowerCase()
+      .replace(/\b(song)(\b)/g, "music")
+      .match(/music|podcast|audiobook/g);
+
+    if (titleKeywords && titleKeywords.length) {
+      categories = [...categories, ...titleKeywords];
+    }
+  }
+  if (tags && tags.length) {
+    tagsKeywords = tags
+      .join(" ")
+      .toLowerCase()
+      .match(/music|podcast|audiobook/g);
+    if (tagsKeywords && tagsKeywords.length) {
+      categories = [...categories, ...tagsKeywords];
+    }
+  }
+  if (description && description.length >= 5) {
+    descriptionKeywords = description
+      .toLowerCase()
+      .match(/music|podcast|audiobook/g);
+    if (descriptionKeywords && descriptionKeywords.length) {
+      categories = [...categories, ...descriptionKeywords];
+    }
+  }
+
+  const counts = {};
+
+  categories.forEach((x) => {
+    counts[x] = (counts[x] || 0) + 1;
+  });
+
+  categories = Object.entries(counts);
+
+  if (categories.length) {
+    if (categories.length > 1) {
+      category = categories.sort((a, b) => b[1] - a[1])[0][0];
+    } else {
+      category = categories[0][0];
+    }
+  }
+
+  return category;
+};
+
 // Micro version of Scrapz in javascript
 const Scrapz = (claim) => {
   // Quick filters
@@ -68,11 +123,11 @@ const Scrapz = (claim) => {
 
   // Find categories
   if (metadata.tags && metadata.tags.length) {
-    const types = ["music", "podcast", "audiobook"];
-    const categories = metadata.tags.filter((tag) => types.includes(tag));
-    if (categories && categories.length) {
-      stream.stream_type = categories[0];
-    }
+    stream.stream_type = findCategory(
+      stream.title,
+      metadata.tags,
+      stream.description
+    );
   }
 
   return stream;
