@@ -1,11 +1,34 @@
 // Scrapz utils
+const data = require("./data.json");
+
+const GENRES_REGEX = (type) => {
+  const genresGroup = data["genres"][type];
+  if (genresGroup) {
+    return new RegExp(`\\b(${genresGroup.join("|")})\\b`, "g");
+  }
+};
+const genresPatterns = {
+  music: GENRES_REGEX("music"),
+  podcast: GENRES_REGEX("podcast"),
+  audiobook: GENRES_REGEX("audiobook"),
+};
+
+const findGenres = (type, tags) => {
+  const pattern = genresPatterns[type];
+  if (pattern) {
+    const matches = tags.join(" ").match(pattern);
+    if (matches && matches.length) {
+      return matches.slice(0, 3);
+    }
+  }
+};
+
 const findCategory = (title, tags, description) => {
   let categories = [];
   let titleKeywords;
   let tagsKeywords;
   let descriptionKeywords;
   let category;
-
   if (title && title.length >= 5) {
     titleKeywords = title
       .toLowerCase()
@@ -121,6 +144,7 @@ const Scrapz = (claim) => {
   // TODO: Fix typo on api
   stream.cannonical_url = claim.canonical_url.replace("lbry://", "");
 
+
   // Find categories
   if (metadata.tags && metadata.tags.length) {
     stream.stream_type = findCategory(
@@ -128,6 +152,11 @@ const Scrapz = (claim) => {
       metadata.tags,
       stream.description
     );
+
+    if (stream.stream_type === "music" || stream.stream_type === "podcast") {
+      stream.genres = findGenres(stream.stream_type, metadata.tags);
+    }
+
   }
 
   return stream;

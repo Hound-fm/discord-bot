@@ -1,6 +1,6 @@
 {
-  "GENERES": {
-    "MUSIC": [
+  "genres": {
+    "music": [
       "acid house",
       "acid jazz",
       "acid rock",
@@ -546,7 +546,7 @@
       "zouk",
       "zydeco"
     ],
-    "PODCAST": [
+    "podcast": [
       "advice",
       "arts",
       "automobile",
@@ -572,6 +572,27 @@
       "sports",
       "technology",
       "video game"
+    ],
+    "audiobook": [
+      "music",
+      "fantasy",
+      "fiction",
+      "history",
+      "horror",
+      "mistery",
+      "comedy",
+      "novel",
+      "poetry",
+      "thriller",
+      "romance",
+      "memoir",
+      "mythology",
+      "sci-fi",
+      "science-fiction",
+      "crime",
+      "true-crime",
+      "philosophy",
+      "psychology"
     ]
   }
 }

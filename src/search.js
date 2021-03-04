@@ -23,7 +23,9 @@ const defaultParams = { free_only: false, nsfw: false };
 
 const lightHouseSearch = async (query, searchOptions = defaultParams) => {
   const params = { ...defaultParams, ...searchOptions };
-  const url = LIGHTHOUSE_API + querystring.stringify(params) + `&s=${query}`;
+  const url = encodeURI(
+    LIGHTHOUSE_API + querystring.stringify(params) + `&s=${query}`
+  );
   const res = await fetch(url);
   const data = await res.json();
   return data;

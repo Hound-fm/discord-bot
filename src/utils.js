@@ -1,4 +1,5 @@
 const webLink = (host, url) => "https://" + host + "/" + url.replace(/#/g, ":");
+const { parseURI } = require("./lbryURI.js");
 
 const getWebLinks = (canonicalURL, format = "url") => {
   const hosts = ["lbry.tv", "odysee.com"];
