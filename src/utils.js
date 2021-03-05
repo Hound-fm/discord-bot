@@ -3,10 +3,12 @@ const { parseURI } = require("./lbryURI.js");
 const webLink = (host, url) =>
   encodeURI("https://" + host + "/" + url.replace(/#/g, ":"));
 
-const getWebLinks = (canonicalURL, format = "url") => {
+const getWebLinks = (canonicalURL, format = "url", label) => {
   const hosts = ["lbry.tv", "odysee.com"];
   if (format === "markdown") {
-    return hosts.map((host) => `[${host}](${webLink(host, canonicalURL)})`);
+    return hosts.map(
+      (host) => `[${label || host}](${webLink(host, canonicalURL)})`
+    );
   }
   return hosts.map((host) => webLink(host, canonicalURL));
 };
@@ -16,7 +18,7 @@ const getStreamLink = ({ name, id }) => {
 };
 
 const getPublisherCanonicalUrl = (name, id, host) => {
-  return (host ? `https://${host}/` : "") + name + ":" + id[0];
+  return encodeURI((host ? `https://${host}/` : "") + name + ":" + id[0]);
 };
 
 const parseMessage = (message = { content: "" }, prefixes) => {
@@ -45,7 +47,7 @@ const truncateText = (str = "", limit = 40) => {
   if (str.length <= limit) {
     return str.trim();
   }
-  return str.trim().substring(0, limit) + "...";
+  return str.trim().substring(0, limit).trim() + "...";
 };
 
 const formatTitle = (str = "") => {

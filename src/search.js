@@ -131,11 +131,10 @@ const search = async (textInput, searchOptions = defaultParams) => {
   if (results && results.length) {
     results = await Promise.all(results.map(async (i) => Scrapz(i)));
     results = results.filter((item) => {
-      if (item != null) {
-        return item;
+      if (item) {
+        return item.stream_type;
       }
-      if (searchOptions && searchOptions.free_only) {
-      }
+      return false;
     });
   }
 

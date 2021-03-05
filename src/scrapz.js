@@ -144,7 +144,6 @@ const Scrapz = (claim) => {
   // TODO: Fix typo on api
   stream.cannonical_url = claim.canonical_url.replace("lbry://", "");
 
-
   // Find categories
   if (metadata.tags && metadata.tags.length) {
     stream.stream_type = findCategory(
@@ -152,11 +151,14 @@ const Scrapz = (claim) => {
       metadata.tags,
       stream.description
     );
+    console.info(stream.stream_type);
+    if (!stream.stream_type) {
+      return;
+    }
 
     if (stream.stream_type === "music" || stream.stream_type === "podcast") {
       stream.genres = findGenres(stream.stream_type, metadata.tags);
     }
-
   }
 
   return stream;

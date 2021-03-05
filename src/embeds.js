@@ -44,7 +44,7 @@ const ABOUT = {
 const formatDescription = (description) => {
   try {
     const str = remark().use(strip).processSync(description).toString();
-    return truncateText(str);
+    return truncateText(str).replace(/\r?\n|\r/g, " ");
   } catch (error) {
     console.error(error);
   }
@@ -57,36 +57,62 @@ const STREAM_COLORS = {
   DEFAULT: 9807270,
 };
 
-const QUEUE = (queue) => ({
-  title: "Queue",
-  color: STREAM_COLORS[queue[0].metadata.stream_type] || STREAM_COLORS.DEFAULT,
-  fields: [
-    {
+const getPublisherMarkdownLink = (metadata) => {
+  return `[${truncateText(
+    metadata.publisher_title,
+    25
+  )}](${getPublisherCanonicalUrl(
+    metadata.publisher_name,
+    metadata.publisher_id,
+    "lbry.tv"
+  )})`;
+};
+
+const QUEUE = (queue = []) => {
+  const fields = [];
+  // Inmutable array
+  let queueItems = queue.slice(0, 11);
+  const firstStream = queueItems.shift();
+  // Now playing
+  if (firstStream) {
+    fields.push({
       name: "Now playing:",
       value:
-        truncateText(queue[0].metadata.title) +
+        `[${truncateText(firstStream.metadata.title)}](${
+          getWebLinks(firstStream.metadata.cannonical_url)[0]
+        })` +
         " - " +
-        `[${truncateText(
-          queue[0].metadata.publisher_title,
-          25
-        )}](https://lbry.tv)`,
-    },
-    {
+        getPublisherMarkdownLink(firstStream.metadata),
+    });
+  }
+
+  if (queueItems && queueItems.length) {
+    fields.push({
       name: "Next:",
-      value: queue
+      value: queueItems
         .map(
           (item, index) =>
-            `[${index + 1}](https://lbry.tv) - ` +
-            truncateText(item.metadata.title) +
-            ` - [${truncateText(
-              item.metadata.publisher_title,
-              25
-            )}](https://lbry.tv)`
+            `${
+              getWebLinks(
+                item.metadata.cannonical_url,
+                "markdown",
+                index + 1
+              )[0]
+            } - ` + truncateText(item.metadata.title)
+          // Removed becasue queue string size is very limited.
+          // + " - " + getPublisherMarkdownLink(item.metadata)
         )
         .join("\n"),
-    },
-  ],
-});
+    });
+  }
+
+  return {
+    title: "Queue",
+    color:
+      STREAM_COLORS[firstStream.metadata.stream_type] || STREAM_COLORS.DEFAULT,
+    fields,
+  };
+};
 
 const STREAM = ({
   title,
@@ -132,7 +158,9 @@ const STREAM = ({
         value: getWebLinks(cannonical_url, "markdown").join("\n"),
       },
     ],
-    footer: { text: "License: " + license },
+    footer: {
+      text: "License: " + truncateText(license).replace(/\r?\n|\r/g, " "),
+    },
   };
 };
 
