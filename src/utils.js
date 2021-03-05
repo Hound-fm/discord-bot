@@ -1,5 +1,7 @@
-const webLink = (host, url) => "https://" + host + "/" + url.replace(/#/g, ":");
 const { parseURI } = require("./lbryURI.js");
+
+const webLink = (host, url) =>
+  encodeURI("https://" + host + "/" + url.replace(/#/g, ":"));
 
 const getWebLinks = (canonicalURL, format = "url") => {
   const hosts = ["lbry.tv", "odysee.com"];
@@ -10,7 +12,7 @@ const getWebLinks = (canonicalURL, format = "url") => {
 };
 
 const getStreamLink = ({ name, id }) => {
-  return `https://lbry.tv/$/download/${name}/${id}`;
+  return encodeURI(`https://lbry.tv/$/download/${name}/${id}`);
 };
 
 const getPublisherCanonicalUrl = (name, id, host) => {
