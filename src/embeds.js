@@ -57,6 +57,37 @@ const STREAM_COLORS = {
   DEFAULT: 9807270,
 };
 
+const QUEUE = (queue) => ({
+  title: "Queue",
+  color: STREAM_COLORS[queue[0].metadata.stream_type] || STREAM_COLORS.DEFAULT,
+  fields: [
+    {
+      name: "Now playing:",
+      value:
+        truncateText(queue[0].metadata.title) +
+        " - " +
+        `[${truncateText(
+          queue[0].metadata.publisher_title,
+          25
+        )}](https://lbry.tv)`,
+    },
+    {
+      name: "Next:",
+      value: queue
+        .map(
+          (item, index) =>
+            `[${index + 1}](https://lbry.tv) - ` +
+            truncateText(item.metadata.title) +
+            ` - [${truncateText(
+              item.metadata.publisher_title,
+              25
+            )}](https://lbry.tv)`
+        )
+        .join("\n"),
+    },
+  ],
+});
+
 const STREAM = ({
   title,
   genres,
@@ -148,6 +179,7 @@ const COMMUNITY_POOL = (user, stream) => ({
 module.exports = {
   ABOUT,
   ERROR,
+  QUEUE,
   STREAM,
   COMMAND_LIST,
   COMMUNITY_POOL,

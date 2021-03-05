@@ -76,15 +76,33 @@ const voiceChannelAction = (message, action) => {
       ErrorHandler.ERRORS.VOICE_CHANNEL_CONNECTION
     );
     return;
-  } else if (!serverQueue || !serverQueue.connection) {
+  } else if (
+    !serverQueue ||
+    !serverQueue.connection ||
+    !serverQueue.streams ||
+    !serverQueue.streams.length
+  ) {
     ErrorHandler.sendError(message, ErrorHandler.ERRORS.EMPTY_QUEUE);
     return;
   }
-
   action(serverQueue);
 };
 
 module.exports.getServerQueue = getServerQueue;
+
+module.exports.getQueue = (message) => {
+  const serverQueue = getServerQueue(message);
+  if (
+    !serverQueue ||
+    !serverQueue.connection ||
+    !serverQueue.streams ||
+    !serverQueue.streams.length
+  ) {
+    ErrorHandler.sendError(message, ErrorHandler.ERRORS.EMPTY_QUEUE);
+    return;
+  }
+  message.channel.send({ embed: EMBED.QUEUE(serverQueue.streams) });
+};
 
 module.exports.pause = (message) => {
   const action = (serverQueue) => {

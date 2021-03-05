@@ -42,6 +42,9 @@ const isBotMention = (client, message) =>
   message.mentions.users.get(client.user.id) != null;
 
 const truncateText = (str = "", limit = 40) => {
+  if (str.length <= limit) {
+    return str.trim();
+  }
   return str.trim().substring(0, limit) + "...";
 };
 

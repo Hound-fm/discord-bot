@@ -24,31 +24,8 @@ const chance_list = new Chance();
 // The dot prefix is intended for  mobile users
 let prefixes = [".", "~"];
 
-client.on("ready", (message) => {
-  setActivity("LISTENING", "@hound.fm");
-});
-
-client.on("message", async (message) => {
-  if (isBotMention(client, message)) {
-    message.channel.send({ embed: EMBED.ABOUT });
-    return;
-  }
-
-  const { arg, args, command, prefix } = parseMessage(message, prefixes);
-
-  // Ignore normal messages and other bots
-  if (!prefix || !command || message.author.bot) return;
-
-  if (command === "help") {
-    message.channel.send({ embed: EMBED.COMMAND_LIST });
-    setMessageStatus(message, MESSAGE_STATUS.READY);
-  }
-
-  if (command === "about") {
-    message.channel.send({ embed: EMBED.ABOUT });
-    setMessageStatus(message, MESSAGE_STATUS.READY);
-  }
-
+// Handle player actions
+const handleplayerCommands = (message, { command, arg }) => {
   if (command === "play" || command === "p") {
     const searchQuery = arg.trim();
     VoiceStream.play(message, searchQuery);
@@ -66,8 +43,41 @@ client.on("message", async (message) => {
     VoiceStream.skip(message);
   }
 
+  if (command === "queue") {
+    VoiceStream.getQueue(message);
+  }
+
   if (command === "stop" || command === "disconnect") {
     VoiceStream.stop(message);
+  }
+};
+
+client.on("ready", (message) => {
+  setActivity("LISTENING", "@hound.fm");
+});
+
+client.on("message", async (message) => {
+  if (isBotMention(client, message)) {
+    message.channel.send({ embed: EMBED.ABOUT });
+    return;
+  }
+
+  const { arg, args, command, prefix } = parseMessage(message, prefixes);
+
+  // Ignore normal messages and other bots
+  if (!prefix || !command || message.author.bot) return;
+
+  // Player actions
+  handleplayerCommands(message, { command, arg });
+
+  if (command === "help") {
+    message.channel.send({ embed: EMBED.COMMAND_LIST });
+    setMessageStatus(message, MESSAGE_STATUS.READY);
+  }
+
+  if (command === "about") {
+    message.channel.send({ embed: EMBED.ABOUT });
+    setMessageStatus(message, MESSAGE_STATUS.READY);
   }
 
   if (command === "pick") {
@@ -125,29 +135,10 @@ const handlePlayerActions = async (interaction, action) => {
   const command = action.name;
   const args = action.options;
   const arg = args ? args[0].value : null;
-  // Aknowledge interaction
-  const interactionReply = await replyInteraction(interaction);
+  await replyInteraction(interaction);
 
-  if (command === "play") {
-    const searchQuery = arg.trim();
-    VoiceStream.play(message, searchQuery);
-  }
-
-  if (command === "pause") {
-    VoiceStream.pause(message);
-  }
-
-  if (command === "resume") {
-    VoiceStream.resume(message);
-  }
-
-  if (command === "skip") {
-    VoiceStream.skip(message);
-  }
-
-  if (command === "stop" || command === "disconnect") {
-    VoiceStream.stop(message);
-  }
+  // Player actions
+  handleplayerCommands(message, { command, arg });
 };
 
 client.ws.on("INTERACTION_CREATE", async (interaction) => {
