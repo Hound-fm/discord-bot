@@ -5,32 +5,24 @@ const EMBED = require("./embeds.js");
 const { MESSAGE_STATUS } = require("./constants.js");
 const Hound = require("./api.js");
 const Chance = require("chance");
-const Discord = require("discord.js");
 const VoiceStream = require("./voiceStream.js");
 const { searchBestResult } = require("./search.js");
 const { CommunityPool } = require("./communityPicks.js");
-
+// Bot Client
+const {
+  client,
+  setActivity,
+  inlineReply,
+  replyInteraction,
+} = require("./bot.js");
 // Import utils
 const { parseMessage, isBotMention, setMessageStatus } = require("./utils.js");
-
-// Discord client
-const client = new Discord.Client();
 
 const chance_group = new Chance();
 const chance_list = new Chance();
 
 // The dot prefix is intended for  mobile users
 let prefixes = [".", "~"];
-
-const setActivity = (type, name) => {
-  // Set the client user's activity
-  client.user
-    .setActivity(name, { type })
-    .then((presence) =>
-      console.log(`Activity set to ${presence.activities[0].name}`)
-    )
-    .catch(console.error);
-};
 
 client.on("ready", (message) => {
   setActivity("LISTENING", "@hound.fm");
@@ -57,7 +49,7 @@ client.on("message", async (message) => {
     setMessageStatus(message, MESSAGE_STATUS.READY);
   }
 
-  if (command === "play") {
+  if (command === "play" || command === "p") {
     const searchQuery = arg.trim();
     VoiceStream.play(message, searchQuery);
   }
@@ -88,7 +80,7 @@ client.on("message", async (message) => {
   if (command === "search") {
     const stream = await searchBestResult(message, arg);
     if (stream) {
-      message.channel.send({ embed: EMBED.STREAM(stream) });
+      inlineReply(message, { embed: EMBED.STREAM(stream) });
     }
   }
 
@@ -108,8 +100,8 @@ client.on("message", async (message) => {
       const stream = shuffled[0];
 
       if (stream && stream.cannonical_url && stream.publisher_title) {
-        message.channel.send({ embed: EMBED.STREAM(stream) });
         setMessageStatus(message, MESSAGE_STATUS.READY);
+        inlineReply(message, { embed: EMBED.STREAM(stream) });
       } else {
         setMessageStatus(message, MESSAGE_STATUS.ERROR);
       }
@@ -118,12 +110,6 @@ client.on("message", async (message) => {
     }
   }
 });
-
-const handleInteraction = async (interaction, output) => {
-  await client.api
-    .interactions(interaction.id, interaction.token)
-    .callback.post({ data: { type: 5 } });
-};
 
 const handlePlayerActions = async (interaction, action) => {
   // Map message data:
@@ -140,7 +126,7 @@ const handlePlayerActions = async (interaction, action) => {
   const args = action.options;
   const arg = args ? args[0].value : null;
   // Aknowledge interaction
-  await handleInteraction(interaction, command);
+  const interactionReply = await replyInteraction(interaction);
 
   if (command === "play") {
     const searchQuery = arg.trim();

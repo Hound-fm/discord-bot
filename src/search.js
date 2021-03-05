@@ -3,7 +3,6 @@ const Scrapz = require("./scrapz.js");
 const ErrorHandler = require("./errors.js");
 const fetch = require("node-fetch");
 const querystring = require("querystring");
-
 const { MESSAGE_STATUS } = require("./constants.js");
 const { lbryProxy } = require("./lbryProxy.js");
 const { parseURI, buildURI } = require("./lbryURI.js");
@@ -70,7 +69,7 @@ const fuzzySearch = async (input, searchOptions) => {
         results = fuzzy.search(input);
         results = results
           .map((res) => {
-            if (res.score < 0.64) {
+            if (res.score < 0.62) {
               return res.item;
             }
           })
@@ -153,8 +152,8 @@ const searchBestResult = async (message, searchQuery, searchOptions) => {
     let results = await search(searchQuery, searchOptions);
 
     if (results && results.length) {
-      const metadata = results[0];
       setMessageStatus(message, MESSAGE_STATUS.READY);
+      const metadata = results[0];
       return metadata;
     } else {
       ErrorHandler.sendError(message, ErrorHandler.ERRORS.EMPTY_SEARCH);

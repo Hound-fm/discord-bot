@@ -76,7 +76,7 @@ const STREAM = ({
     description: formatDescription(description),
     author: {
       name: publisher_title || "Uknown",
-      icon_url: thumbnail_url,
+      //icon_url: thumbnail_url,
       url: getPublisherCanonicalUrl(publisher_name, publisher_id, "lbry.tv"),
     },
     thumbnail: { url: thumbnail_url },
@@ -101,7 +101,7 @@ const STREAM = ({
         value: getWebLinks(cannonical_url, "markdown").join("\n"),
       },
     ],
-    footer: { text: license || "" },
+    footer: { text: "License: " + license },
   };
 };
 
