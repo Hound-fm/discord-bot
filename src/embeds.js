@@ -13,12 +13,7 @@ const {
 const COMMAND_LIST = {
   color: 3447003,
   title: "Command list",
-  description: `
-  **help** - Show command list
-  **pick** <url> - Community picks
-  **about** - Project description
-  **random | shuffle** <genre> - Random song
-  `,
+  description: `Full list of [commands](https://github.com/Hound-fm/discord-bot#commands)`,
 };
 
 const ERROR = (message) => ({
