@@ -122,6 +122,12 @@ client.on("ready", (message) => {
 });
 
 client.on("message", async (message) => {
+  // Ignore direct messages
+  if (message.channel.type === "dm") {
+    return;
+  }
+
+  // Listen for bot mention
   if (isBotMention(client, message)) {
     message.channel.send({ embed: EMBED.ABOUT });
     return;
@@ -163,6 +169,11 @@ const handlePlayerActions = async (interaction, action) => {
 };
 
 client.ws.on("INTERACTION_CREATE", async (interaction) => {
+  // Ignore direct messages (DM)
+  if (!interaction.guild_id) {
+    return;
+  }
+
   try {
     const { data } = interaction;
     if (data.name === "player") {
