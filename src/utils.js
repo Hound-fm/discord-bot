@@ -1,7 +1,8 @@
 const { parseURI } = require("./lbryURI.js");
 
-const webLink = (host, url) =>
-  encodeURI("https://" + host + "/" + url.replace(/#/g, ":"));
+const webLink = (host, url) => {
+  return encodeURI("https://" + host + "/" + url.replace(/(#)/g, ":"));
+};
 
 const getWebLinks = (canonicalURL, format = "url", label) => {
   const hosts = ["lbry.tv", "odysee.com"];
@@ -43,11 +44,21 @@ const parseMessage = (message = { content: "" }, prefixes) => {
 const isBotMention = (client, message) =>
   message.mentions.users.get(client.user.id) != null;
 
-const truncateText = (str = "", limit = 40) => {
-  if (str.length <= limit) {
-    return str.trim();
+const truncateText = (str = "", limit = 40, format = "text") => {
+  let truncated = str.trim();
+  // Remove markdown format
+  if (format === "markdown") {
+    truncated = truncated
+      .replace(/_/g, "\\_")
+      .replace(/-/g, "\\-")
+      .replace(/~/g, "\\~");
   }
-  return str.trim().substring(0, limit).trim() + "...";
+
+  if (str.length <= limit) {
+    return truncated;
+  }
+
+  return truncated.substring(0, limit).trim() + "...";
 };
 
 const formatTitle = (str = "") => {

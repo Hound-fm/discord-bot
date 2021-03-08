@@ -2,16 +2,20 @@ const Discord = require("discord.js");
 const client = new Discord.Client();
 
 module.exports.inlineReply = (message, replyData) => {
-  client.api.channels[message.channel.id].messages.post({
-    data: {
-      ...replyData,
-      message_reference: {
-        message_id: message.id,
-        guild_id: message.guild.id,
-        channel_id: message.channel.id,
+  if (!message.isSlashCommand) {
+    client.api.channels[message.channel.id].messages.post({
+      data: {
+        ...replyData,
+        message_reference: {
+          message_id: message.id,
+          guild_id: message.guild.id,
+          channel_id: message.channel.id,
+        },
       },
-    },
-  });
+    });
+  } else {
+    message.channel.send(replyData);
+  }
 };
 
 module.exports.setActivity = (type, name) => {

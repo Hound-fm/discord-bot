@@ -2,10 +2,12 @@ const Fuse = require("fuse.js");
 const Scrapz = require("./scrapz.js");
 const ErrorHandler = require("./errors.js");
 const fetch = require("node-fetch");
+const memoize = require("memoizee");
 const querystring = require("querystring");
 const { MESSAGE_STATUS } = require("./constants.js");
 const { lbryProxy } = require("./lbryProxy.js");
 const { parseURI, buildURI } = require("./lbryURI.js");
+const { PerformanceObserver, performance } = require("perf_hooks");
 // Import utils
 const {
   isHex,
@@ -67,13 +69,14 @@ const fuzzySearch = async (input, searchOptions) => {
           ],
         });
         results = fuzzy.search(input);
-        results = results
-          .map((res) => {
+        results = await Promise.all(
+          results.map(async (res) => {
             if (res.score < 0.62) {
               return res.item;
             }
           })
-          .filter((item) => item != null);
+        );
+        results = results.filter((item) => item != null);
       }
     }
     return results;
@@ -82,87 +85,98 @@ const fuzzySearch = async (input, searchOptions) => {
   }
 };
 
-const search = async (textInput, searchOptions = defaultParams) => {
-  // Store results
-  let results;
-  // Format input
-  let input = textInput.trim();
-  // Identifier: claim_id, url, cannonical_url, web links, etc...
-  const single = input.split(" ").length === 1;
-  if (single) {
-    input = formatSearchInput(textInput);
-    try {
-      const uri = input.startsWith("https://")
-        ? parseURL(input)
-        : parseURI(input);
+const search = memoize(
+  async (textInput, searchOptions = defaultParams) =>
+    new Promise(async (resolve, reject) => {
+      // Store results
+      let results;
+      // Format input
+      let input = textInput.trim();
+      // Identifier: claim_id, url, cannonical_url, web links, etc...
+      const single = input.split(" ").length === 1;
+      if (single) {
+        input = formatSearchInput(textInput);
+        try {
+          const uri = input.startsWith("https://")
+            ? parseURL(input)
+            : parseURI(input);
 
-      // Search for streams only
-      if (uri.isChannel) {
-        return;
+          // Search for streams only
+          if (uri.isChannel) {
+            return reject("Can't resolve channels");
+          }
+
+          const claimId = getClaimId(uri);
+          // Sarch by claim_id
+          if (claimId) {
+            results = await lbryProxy("claim_search", { claim_id: claimId });
+          } else if (
+            uri.streamName &&
+            (uri.streamClaimId || uri.channelClaimName)
+          ) {
+            // Exact resolve
+            const resolveURI = buildURI({
+              streamName: uri.streamName,
+              streamClaimId: uri.streamClaimId,
+              channelClaimId: uri.channelClaimId,
+              channelClaimName: uri.channelClaimName,
+            });
+
+            results = await lbryProxy("resolve", { urls: [resolveURI] });
+          } else {
+            results = await fuzzySearch(uri.streamName, searchOptions);
+          }
+        } catch (error) {
+          console.error(error);
+          return reject(error);
+        }
+      } else {
+        results = await fuzzySearch(input, searchOptions);
       }
 
-      const claimId = getClaimId(uri);
-      // Sarch by claim_id
-      if (claimId) {
-        results = await lbryProxy("claim_search", { claim_id: claimId });
-      } else if (
-        uri.streamName &&
-        (uri.streamClaimId || uri.channelClaimName)
-      ) {
-        // Exact resolve
-        const resolveURI = buildURI({
-          streamName: uri.streamName,
-          streamClaimId: uri.streamClaimId,
-          channelClaimId: uri.channelClaimId,
-          channelClaimName: uri.channelClaimName,
-        });
+      if (results && results.length) {
+        results = await Promise.all(results.map(async (i) => Scrapz(i)));
+        results = results.filter((item) => item && item.stream_type);
+      }
 
-        results = await lbryProxy("resolve", { urls: [resolveURI] });
+      return resolve(results);
+    }),
+  {
+    promise: true,
+    maxAge: 15 * 1000,
+    preFetch: true,
+    max: 100,
+  }
+);
+
+const searchBestResult = (message, searchQuery, searchOptions) =>
+  new Promise(async (resolve, reject) => {
+    try {
+      if (!searchQuery || !searchQuery.length || searchQuery.length < 3) {
+        ErrorHandler.sendError(message, ErrorHandler.ERRORS.EMPTY_SEARCH);
+        return reject("error: search");
+      }
+      // Check peformance
+      // const t0 = performance.now();
+      let results = await search(searchQuery, searchOptions);
+      // const t1 = performance.now();
+      // console.log("Search time: " + (t1 - t0) / 1000 + " seconds");
+
+      if (results && results.length) {
+        setMessageStatus(message, MESSAGE_STATUS.READY);
+        const metadata = results[0];
+        return resolve(metadata);
       } else {
-        results = await fuzzySearch(uri.streamName, searchOptions);
+        ErrorHandler.sendError(message, ErrorHandler.ERRORS.EMPTY_SEARCH);
+        return reject("error: search");
       }
     } catch (error) {
       console.error(error);
-    }
-  } else {
-    results = await fuzzySearch(input, searchOptions);
-  }
-
-  if (results && results.length) {
-    results = await Promise.all(results.map(async (i) => Scrapz(i)));
-    results = results.filter((item) => {
-      if (item) {
-        return item.stream_type;
-      }
-      return false;
-    });
-  }
-
-  return results;
-};
-
-const searchBestResult = async (message, searchQuery, searchOptions) => {
-  try {
-    if (!searchQuery || !searchQuery.length || searchQuery.length < 3) {
       ErrorHandler.sendError(message, ErrorHandler.ERRORS.EMPTY_SEARCH);
-      return;
+      return reject("error: search");
     }
+  });
 
-    let results = await search(searchQuery, searchOptions);
-
-    if (results && results.length) {
-      setMessageStatus(message, MESSAGE_STATUS.READY);
-      const metadata = results[0];
-      return metadata;
-    } else {
-      ErrorHandler.sendError(message, ErrorHandler.ERRORS.EMPTY_SEARCH);
-      return;
-    }
-  } catch (error) {
-    console.error(error);
-    ErrorHandler.sendError(message, ErrorHandler.ERRORS.EMPTY_SEARCH);
-    return;
-  }
+module.exports = {
+  searchBestResult,
 };
-
-module.exports = { search, searchBestResult };

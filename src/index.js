@@ -25,31 +25,96 @@ const chance_list = new Chance();
 let prefixes = [".", "~"];
 
 // Handle player actions
-const handleplayerCommands = (message, { command, arg }) => {
-  if (command === "play" || command === "p") {
-    const searchQuery = arg.trim();
-    VoiceStream.play(message, searchQuery);
-  }
+const handleplayerCommands = async (message, { command, args, arg }) => {
+  try {
+    if (command === "play" || command === "p") {
+      const searchQuery = arg.trim();
+      await VoiceStream.play(message, searchQuery);
+    }
 
-  if (command === "pause") {
-    VoiceStream.pause(message);
-  }
+    if (command === "pause") {
+      VoiceStream.pause(message);
+    }
 
-  if (command === "resume") {
-    VoiceStream.resume(message);
-  }
+    if (command === "resume") {
+      VoiceStream.resume(message);
+    }
 
-  if (command === "skip") {
-    VoiceStream.skip(message);
-  }
+    if (command === "skip") {
+      VoiceStream.resume(message);
+      VoiceStream.skip(message);
+    }
 
-  if (command === "queue") {
-    VoiceStream.getQueue(message);
-  }
+    if (command === "queue") {
+      VoiceStream.getQueue(message, arg);
+    }
 
-  if (command === "stop" || command === "disconnect") {
-    VoiceStream.stop(message);
+    if (command === "stop" || command === "disconnect") {
+      VoiceStream.stop(message);
+    }
+  } catch (error) {
+    handleErrors(error);
   }
+};
+
+const handleUserCommands = async (message, { command, args, arg }) => {
+  try {
+    if (command === "help") {
+      message.channel.send({ embed: EMBED.COMMAND_LIST });
+      setMessageStatus(message, MESSAGE_STATUS.READY);
+    }
+
+    if (command === "about") {
+      message.channel.send({ embed: EMBED.ABOUT });
+      setMessageStatus(message, MESSAGE_STATUS.READY);
+    }
+
+    if (command === "pick") {
+      const stream = await searchBestResult(message, arg);
+      if (stream) {
+        CommunityPool(message, stream);
+      }
+    }
+
+    if (command === "search") {
+      const stream = await searchBestResult(message, arg);
+      if (stream) {
+        inlineReply(message, { embed: EMBED.STREAM(stream) });
+      }
+    }
+
+    if (command === "random" || command === "shuffle") {
+      // Get genre
+      let [genre] = args;
+      if (genre) {
+        genre = genre.replace(/-/g, " ");
+      }
+      // Randomize content group
+      const group = chance_group.pickone(["latest", "popular"]);
+      // Get streams list
+      const list = await Hound.getStreams(genre, group);
+      // Validate list
+      if (list && list.length) {
+        const shuffled_1 = chance_list.shuffle(list);
+        const stream = shuffled[0];
+
+        if (stream && stream.cannonical_url && stream.publisher_title) {
+          setMessageStatus(message, MESSAGE_STATUS.READY);
+          inlineReply(message, { embed: EMBED.STREAM(stream) });
+        } else {
+          setMessageStatus(message, MESSAGE_STATUS.ERROR);
+        }
+      } else {
+        setMessageStatus(message, MESSAGE_STATUS.ERROR);
+      }
+    }
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+const handleErrors = (error) => {
+  console.error(error);
 };
 
 client.on("ready", (message) => {
@@ -68,56 +133,11 @@ client.on("message", async (message) => {
   if (!prefix || !command || message.author.bot) return;
 
   // Player actions
-  handleplayerCommands(message, { command, arg });
-
-  if (command === "help") {
-    message.channel.send({ embed: EMBED.COMMAND_LIST });
-    setMessageStatus(message, MESSAGE_STATUS.READY);
-  }
-
-  if (command === "about") {
-    message.channel.send({ embed: EMBED.ABOUT });
-    setMessageStatus(message, MESSAGE_STATUS.READY);
-  }
-
-  if (command === "pick") {
-    const stream = await searchBestResult(message, arg);
-    if (stream) {
-      CommunityPool(message, stream);
-    }
-  }
-
-  if (command === "search") {
-    const stream = await searchBestResult(message, arg);
-    if (stream) {
-      inlineReply(message, { embed: EMBED.STREAM(stream) });
-    }
-  }
-
-  if (command === "random" || command === "shuffle") {
-    // Get genre
-    let [genre] = args;
-    if (genre) {
-      genre = genre.replace(/-/g, " ");
-    }
-    // Randomize content group
-    const group = chance_group.pickone(["latest", "popular"]);
-    // Get streams list
-    const list = await Hound.getStreams(genre, group);
-    // Validate list
-    if (list && list.length) {
-      const shuffled_1 = chance_list.shuffle(list);
-      const stream = shuffled[0];
-
-      if (stream && stream.cannonical_url && stream.publisher_title) {
-        setMessageStatus(message, MESSAGE_STATUS.READY);
-        inlineReply(message, { embed: EMBED.STREAM(stream) });
-      } else {
-        setMessageStatus(message, MESSAGE_STATUS.ERROR);
-      }
-    } else {
-      setMessageStatus(message, MESSAGE_STATUS.ERROR);
-    }
+  try {
+    handleplayerCommands(message, { command, args, arg });
+    handleUserCommands(message, { command, args, arg });
+  } catch (error) {
+    handleErrors(error);
   }
 });
 
@@ -131,6 +151,7 @@ const handlePlayerActions = async (interaction, action) => {
     interaction.member.user.id
   );
   message.client = client;
+  message.isSlashCommand = true;
   // Comamnd name
   const command = action.name;
   const args = action.options;
@@ -142,13 +163,17 @@ const handlePlayerActions = async (interaction, action) => {
 };
 
 client.ws.on("INTERACTION_CREATE", async (interaction) => {
-  const { data } = interaction;
-  if (data.name === "player") {
-    const command = data.options[0];
-    if (command.name === "action") {
-      const action = command.options[0];
-      handlePlayerActions(interaction, action);
+  try {
+    const { data } = interaction;
+    if (data.name === "player") {
+      const command = data.options[0];
+      if (command.name === "action") {
+        const action = command.options[0];
+        handlePlayerActions(interaction, action);
+      }
     }
+  } catch (error) {
+    handleErrors(error);
   }
 });
 

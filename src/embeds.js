@@ -44,7 +44,7 @@ const ABOUT = {
 const formatDescription = (description) => {
   try {
     const str = remark().use(strip).processSync(description).toString();
-    return truncateText(str).replace(/\r?\n|\r/g, " ");
+    return truncateText(str, 100).replace(/\r?\n|\r/g, " ");
   } catch (error) {
     console.error(error);
   }
@@ -90,18 +90,16 @@ const QUEUE = (queue = []) => {
     fields.push({
       name: "Next:",
       value: queueItems
-        .map(
-          (item, index) =>
-            `${
-              getWebLinks(
-                item.metadata.cannonical_url,
-                "markdown",
-                index + 1
-              )[0]
-            } - ` + truncateText(item.metadata.title)
-          // Removed becasue queue string size is very limited.
-          // + " - " + getPublisherMarkdownLink(item.metadata)
-        )
+        .map((item, index) => {
+          const link = getWebLinks(
+            item.metadata.cannonical_url,
+            "markdown",
+            index + 1
+          )[0];
+          return (
+            `${link} -` + truncateText(item.metadata.title, 48, "markdown")
+          );
+        })
         .join("\n"),
     });
   }
@@ -114,8 +112,55 @@ const QUEUE = (queue = []) => {
   };
 };
 
+const STREAM_COMPACT = ({
+  title,
+  author,
+  genres,
+  description,
+  thumbnail_url,
+  cannonical_url,
+  audio_duration,
+  publisher_title,
+  publisher_name,
+  publisher_id,
+  stream_type,
+  license,
+}) => {
+  return {
+    color: STREAM_COLORS[stream_type] || STREAM_COLORS.DEFAULT,
+    title: "Now playing:",
+    thumbnail: { url: thumbnail_url || "" },
+    fields: [
+      {
+        name: title ? formatTitle(title) : "Uknown",
+        value: `By [${publisher_title}](${getPublisherCanonicalUrl(
+          publisher_name,
+          publisher_id,
+          "lbry.tv"
+        )})`,
+      },
+      {
+        name: "Category",
+        value: stream_type ? formatTitle(stream_type) : "Uknown",
+        inline: true,
+      },
+      {
+        name: "Duration",
+        value: durationShortFormat(audio_duration),
+        inline: true,
+      },
+      {
+        name: "Genres",
+        value: formatGenres(genres),
+        inline: true,
+      },
+    ],
+  };
+};
+
 const STREAM = ({
   title,
+  author,
   genres,
   description,
   thumbnail_url,
@@ -132,7 +177,7 @@ const STREAM = ({
     title: title || "Uknown",
     description: formatDescription(description),
     author: {
-      name: publisher_title || "Uknown",
+      name: author || publisher_title || "Uknown",
       //icon_url: thumbnail_url,
       url: getPublisherCanonicalUrl(publisher_name, publisher_id, "lbry.tv"),
     },
@@ -209,6 +254,7 @@ module.exports = {
   ERROR,
   QUEUE,
   STREAM,
+  STREAM_COMPACT,
   COMMAND_LIST,
   COMMUNITY_POOL,
 };

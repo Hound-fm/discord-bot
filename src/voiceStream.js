@@ -2,38 +2,50 @@
 const { searchBestResult } = require("./search.js");
 const EMBED = require("./embeds.js");
 const ErrorHandler = require("./errors.js");
+const { inlineReply } = require("./bot.js");
 const { MESSAGE_STATUS } = require("./constants.js");
 // Import utils
-const { getStreamLink, setMessageStatus } = require("./utils.js");
+const { setMessageStatus } = require("./utils.js");
+const { getStreamLink } = require("./lbryProxy.js");
 
 const queue = new Map();
 
-const connect = async (serverQueue) => {
-  try {
-    // Here we try to join the voicechat and save our connection into our object.
-    serverQueue.connection = await serverQueue.voiceChannel.join();
-
-    // Calling the play function to start a song
-    if (serverQueue) {
-      play(serverQueue, serverQueue.streams[0]);
-    }
-  } catch (err) {
-    // Printing the error message if the bot fails to join the voicechat
-    console.log(err);
-    return serverQueue.textChannel.send(err);
-  }
+const getServerQueue = (message) => {
+  return queue.get(message.guild.id);
 };
 
-const getServerQueue = (message) => queue.get(message.guild.id);
+const connect = (message, serverQueue) =>
+  new Promise(async (resolve, reject) => {
+    try {
+      // Here we try to join the voicechat and save our connection into our object.
+      serverQueue.connection = await serverQueue.voiceChannel.join();
+
+      // Calling the play function to start a song
+      if (
+        serverQueue &&
+        serverQueue.connection &&
+        serverQueue.streams &&
+        serverQueue.streams.length
+      ) {
+        play(message, serverQueue, serverQueue.streams[0]);
+        resolve();
+      } else {
+        reject("No connection or streams");
+      }
+    } catch (error) {
+      return reject(error);
+    }
+  });
 
 const disconnect = (serverQueue) => {
   if (serverQueue && serverQueue.voiceChannel) {
     serverQueue.voiceChannel.leave();
     queue.delete(serverQueue.id);
+  } else {
   }
 };
 
-function play(serverQueue, item) {
+function play(message, serverQueue, item) {
   if (!item) {
     disconnect(serverQueue);
     return;
@@ -41,13 +53,19 @@ function play(serverQueue, item) {
 
   const dispatcher = serverQueue.connection
     .play(item.source)
+    .on("start", () => {
+      console.info("Now playing: ", item.metadata.title);
+      inlineReply(message, {
+        embed: EMBED.STREAM_COMPACT(serverQueue.streams[0].metadata),
+      });
+    })
     .on("finish", () => {
       serverQueue.streams.shift();
-      play(serverQueue, serverQueue.streams[0]);
+      play(message, serverQueue, serverQueue.streams[0]);
     })
-    .on("error", (error) => console.error(error));
-  dispatcher.setVolumeLogarithmic(serverQueue.volume / 5);
-  serverQueue.textChannel.send(`Start playing: **${item.metadata.title}**`);
+    .on("error", (error) => {
+      console.error(error);
+    });
 }
 
 const createQueueContruct = (message, voiceChannel) => {
@@ -79,6 +97,7 @@ const voiceChannelAction = (message, action) => {
   } else if (
     !serverQueue ||
     !serverQueue.connection ||
+    !serverQueue.connection.dispatcher ||
     !serverQueue.streams ||
     !serverQueue.streams.length
   ) {
@@ -90,7 +109,7 @@ const voiceChannelAction = (message, action) => {
 
 module.exports.getServerQueue = getServerQueue;
 
-module.exports.getQueue = (message) => {
+module.exports.getQueue = (message, arg = "") => {
   const serverQueue = getServerQueue(message);
   if (
     !serverQueue ||
@@ -101,6 +120,14 @@ module.exports.getQueue = (message) => {
     ErrorHandler.sendError(message, ErrorHandler.ERRORS.EMPTY_QUEUE);
     return;
   }
+
+  // Get current stream on queue
+  if (arg && arg.toLowerCase().trim() === "now") {
+    return message.channel.send({
+      embed: EMBED.STREAM_COMPACT(serverQueue.streams[0].metadata),
+    });
+  }
+  // Get queue
   message.channel.send({ embed: EMBED.QUEUE(serverQueue.streams) });
 };
 
@@ -132,48 +159,54 @@ module.exports.stop = (message) => {
   voiceChannelAction(message, action);
 };
 
-module.exports.play = async (message, searchQuery) => {
-  const voiceChannel = message.member.voice.channel;
-  if (!voiceChannel) {
-    ErrorHandler.sendError(
-      message,
-      ErrorHandler.ERRORS.VOICE_CHANNEL_CONNECTION
-    );
-    return;
-  }
-  const permissions = voiceChannel.permissionsFor(message.client.user);
-  if (!permissions.has("CONNECT") || !permissions.has("SPEAK")) {
-    ErrorHandler.sendError(
-      message,
-      ErrorHandler.ERRORS.VOICE_CHANNEL_PERMISSION
-    );
-    return;
-  }
+module.exports.play = (message, searchQuery) =>
+  new Promise(async (resolve, reject) => {
+    try {
+      const voiceChannel = message.member.voice.channel;
+      if (!voiceChannel) {
+        ErrorHandler.sendError(
+          message,
+          ErrorHandler.ERRORS.VOICE_CHANNEL_CONNECTION
+        );
+        return reject(ErrorHandler.ERRORS.VOICE_CHANNEL_CONNECTION);
+      }
+      const permissions = voiceChannel.permissionsFor(message.client.user);
+      if (!permissions.has("CONNECT") || !permissions.has("SPEAK")) {
+        ErrorHandler.sendError(
+          message,
+          ErrorHandler.ERRORS.VOICE_CHANNEL_PERMISSION
+        );
+        return reject(ErrorHandler.ERRORS.VOICE_CHANNEL_PERMISSION);
+      }
 
-  let serverQueue = getServerQueue(message);
+      let serverQueue = getServerQueue(message);
 
-  if (!serverQueue) {
-    serverQueue = createQueueContruct(message, voiceChannel);
-  }
+      if (!serverQueue) {
+        serverQueue = createQueueContruct(message, voiceChannel);
+      }
 
-  if (serverQueue) {
-    // Add stream to queue
-    const metadata = await searchBestResult(message, searchQuery, {
-      free_only: true,
-    });
-    if (metadata) {
-      const source = getStreamLink(metadata);
-      message.channel.send({ embed: EMBED.STREAM(metadata) });
-      serverQueue.streams.push({ metadata, source });
-    } else {
-      // Nothing to add in queue
-      return;
+      if (serverQueue) {
+        // Add stream to queue
+        const metadata = await searchBestResult(message, searchQuery, {
+          free_only: true,
+        });
+        if (metadata) {
+          const source = getStreamLink(metadata);
+          serverQueue.streams.push({ metadata, source });
+        } else {
+          // Nothing to add in queue
+          return reject("Nothing to play or add to queue");
+        }
+      }
+
+      // Join voice channel
+      if (!serverQueue.connection) {
+        await connect(message, serverQueue);
+        setMessageStatus(message, MESSAGE_STATUS.READY);
+      }
+
+      return resolve();
+    } catch (error) {
+      return reject(error);
     }
-  }
-  // serverQueue.streams.push(song);
-  // Join voice channel
-  if (!serverQueue.connection) {
-    await connect(serverQueue);
-    setMessageStatus(message, MESSAGE_STATUS.READY);
-  }
-};
+  });
