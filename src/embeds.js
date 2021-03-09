@@ -10,25 +10,22 @@ const {
   getPublisherCanonicalUrl,
 } = require("./utils.js");
 
-const COMMAND_LIST = {
-  color: 3447003,
-  title: "Command list",
-  description: `Full list of [commands](https://github.com/Hound-fm/discord-bot#commands)`,
-};
-
 const ERROR = (message) => ({
   color: 15158332,
   description: message,
 });
 
-const ABOUT = {
+const HELP = {
   color: 3447003,
-  title: "Hound.fm",
+  title: "Hound.fm - v0.0.1",
   description: `
   A simple audio content aggregator for lbry.
 
   **Command list**
-  Type \`~help\` to see a full list of commands.
+  Check the full list of commands [here](https://github.com/Hound-fm/discord-bot#commands)
+
+  **Invite**
+  Invite the bot to your server. [Just click here](https://discord.com/api/oauth2/authorize?client_id=749751882984980620&permissions=0&scope=bot%20applications.commands)
 
   **Support**
   Help development with a small donation (LBC):
@@ -245,11 +242,10 @@ const COMMUNITY_POOL = (user, stream) => ({
 });
 
 module.exports = {
-  ABOUT,
+  HELP,
   ERROR,
   QUEUE,
   STREAM,
   STREAM_COMPACT,
-  COMMAND_LIST,
   COMMUNITY_POOL,
 };

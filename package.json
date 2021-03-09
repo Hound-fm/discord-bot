@@ -1,6 +1,6 @@
 {
   "name": "discord-bot",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "Community discord bot for hound.fm",
   "main": "src/index.js",
   "repository": "https://github.com/Hound-fm/discord-bot",

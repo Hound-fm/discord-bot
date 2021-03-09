@@ -59,13 +59,8 @@ const handleplayerCommands = async (message, { command, args, arg }) => {
 
 const handleUserCommands = async (message, { command, args, arg }) => {
   try {
-    if (command === "help") {
-      message.channel.send({ embed: EMBED.COMMAND_LIST });
-      setMessageStatus(message, MESSAGE_STATUS.READY);
-    }
-
-    if (command === "about") {
-      message.channel.send({ embed: EMBED.ABOUT });
+    if (command === "help" || command === "about") {
+      message.channel.send({ embed: EMBED.HELP });
       setMessageStatus(message, MESSAGE_STATUS.READY);
     }
 
@@ -129,7 +124,7 @@ client.on("message", async (message) => {
 
   // Listen for bot mention
   if (isBotMention(client, message)) {
-    message.channel.send({ embed: EMBED.ABOUT });
+    message.channel.send({ embed: EMBED.HELP });
     return;
   }
 
