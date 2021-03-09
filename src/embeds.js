@@ -21,11 +21,13 @@ const HELP = {
   description: `
   A simple audio content aggregator for lbry.
 
+  ** Links:** [Website](https://Hound.fm) • [Github](https://github.com/Hound-fm) • [Discord](https://discord.gg/Mbub3FfkZT)
+
   **Command list**
   Check the full list of commands [here](https://github.com/Hound-fm/discord-bot#commands)
 
   **Invite**
-  Invite the bot to your server. [Just click here](https://discord.com/api/oauth2/authorize?client_id=749751882984980620&permissions=0&scope=bot%20applications.commands)
+  Add the bot to your server. [Just click here](https://discord.com/api/oauth2/authorize?client_id=749751882984980620&permissions=0&scope=bot%20applications.commands)
 
   **Support**
   Help development with a small donation (LBC):
@@ -124,6 +126,7 @@ const STREAM_COMPACT = ({
     thumbnail: { url: thumbnail_url || "" },
     fields: [
       {
+        url: getWebLinks(cannonical_url)[0],
         name: title ? formatTitle(title) : "Uknown",
         value: `By [${publisher_title}](${getPublisherCanonicalUrl(
           publisher_name,
