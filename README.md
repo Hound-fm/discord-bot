@@ -10,6 +10,7 @@ Don't forget to include the prefix at the start of the message:
 # Syntax
 {prefix}command <args>
 # Examlples
+~help
 ~queue now
 .queue now
 ```
