@@ -30,7 +30,7 @@ Commands to control the player. You need to **join** a **voice channel** before 
 | name| alias | args | description |
 |---|---|---|---|
 | `play` | `p` | query: Lbry url, id or title | Add stream to queue. If there is no stream playing it will start playing. |
-| `skip` | | | Play next stream in queue.
-| `stop` | `disconnect` | | Disconnect from voice channel and clear queue.
+| `skip` | `next` | | Play next stream in queue.
+| `stop` | `clear`, `disconnect` | | Disconnect from voice channel and clear queue.
 | `queue` | | index: Numeric index on queue | Show current queue of streams. Pass index to show a specific stream.
 | `queue now` | | | Show current playing stream on queue.

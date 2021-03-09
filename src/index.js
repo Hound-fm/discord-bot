@@ -2,7 +2,7 @@
 require("dotenv").config();
 // Constants
 const EMBED = require("./embeds.js");
-const { MESSAGE_STATUS } = require("./constants.js");
+const { DEFAULT_PREFIXES, MESSAGE_STATUS } = require("./constants.js");
 const Hound = require("./api.js");
 const Chance = require("chance");
 const VoiceStream = require("./voiceStream.js");
@@ -21,9 +21,6 @@ const { parseMessage, isBotMention, setMessageStatus } = require("./utils.js");
 const chance_group = new Chance();
 const chance_list = new Chance();
 
-// The dot prefix is intended for  mobile users
-let prefixes = [".", "~"];
-
 // Handle player actions
 const handleplayerCommands = async (message, { command, args, arg }) => {
   try {
@@ -40,7 +37,7 @@ const handleplayerCommands = async (message, { command, args, arg }) => {
       VoiceStream.resume(message);
     }
 
-    if (command === "skip") {
+    if (command === "skip" || command === "next") {
       VoiceStream.resume(message);
       VoiceStream.skip(message);
     }
@@ -49,8 +46,29 @@ const handleplayerCommands = async (message, { command, args, arg }) => {
       VoiceStream.getQueue(message, arg);
     }
 
-    if (command === "stop" || command === "disconnect") {
+    if (command === "stop" || command === "clear" | command === "disconnect") {
       VoiceStream.stop(message);
+    }
+  } catch (error) {
+    handleErrors(error);
+  }
+};
+
+const handleAdminCommands = (message, { command, args, arg }) => {
+  try {
+    console.info(args);
+    if (command === "prefix" && args && args.length > 1) {
+      console.info("ok?");
+      if (args[0] === "add" && args[1] && args[1].length) {
+        console.info("Add new prefix!");
+        prefixes.push(args[1]);
+      }
+      if (args[0] === "remove" && args[1] && args[1].length) {
+        const index = prefixes.indexOf(args[1]);
+        if (index > -1) {
+          prefixes.splice(index, 1);
+        }
+      }
     }
   } catch (error) {
     handleErrors(error);
@@ -112,10 +130,6 @@ const handleErrors = (error) => {
   console.error(error);
 };
 
-client.on("ready", (message) => {
-  setActivity("LISTENING", "@hound.fm");
-});
-
 client.on("message", async (message) => {
   // Ignore direct messages
   if (message.channel.type === "dm") {
@@ -135,6 +149,11 @@ client.on("message", async (message) => {
 
   // Player actions
   try {
+    // Handle admin commands
+    if (message.member.hasPermission("ADMINISTRATOR")) {
+      handleAdminCommands(message, { command, args, arg });
+    }
+    // Handle community commands
     handleplayerCommands(message, { command, args, arg });
     handleUserCommands(message, { command, args, arg });
   } catch (error) {
@@ -168,14 +187,13 @@ client.ws.on("INTERACTION_CREATE", async (interaction) => {
   if (!interaction.guild_id) {
     return;
   }
-
   try {
     const { data } = interaction;
     if (data.name === "player") {
       const command = data.options[0];
       if (command.name === "action") {
         const action = command.options[0];
-        handlePlayerActions(interaction, action);
+        return handlePlayerActions(interaction, action);
       }
     }
   } catch (error) {

@@ -20,6 +20,7 @@
     "fetch-node": "^0.0.1",
     "ffmpeg-static": "^4.2.7",
     "fuse.js": "^6.4.6",
+    "level-party": "^5.0.0",
     "luxon": "^1.26.0",
     "memoizee": "^0.4.15",
     "remark": "^13.0.0",
