@@ -56,7 +56,10 @@ function play(message, serverQueue, item) {
     .on("start", () => {
       console.info("Now playing: ", item.metadata.title);
       inlineReply(message, {
-        embed: EMBED.STREAM_COMPACT(serverQueue.streams[0].metadata),
+        embed: EMBED.STREAM_COMPACT(
+          "Now playing:",
+          serverQueue.streams[0].metadata
+        ),
       });
     })
     .on("finish", () => {
@@ -121,12 +124,30 @@ module.exports.getQueue = (message, arg = "") => {
     return;
   }
 
-  // Get current stream on queue
-  if (arg && arg.toLowerCase().trim() === "now") {
-    return message.channel.send({
-      embed: EMBED.STREAM_COMPACT(serverQueue.streams[0].metadata),
-    });
+  if (arg) {
+    const item = arg.toLowerCase().trim();
+    let index = item && item.length < 3 && parseInt(item);
+    // Get current stream on queue
+    if (item === "now" || index === 0) {
+      return message.channel.send({
+        embed: EMBED.STREAM_COMPACT(
+          "Now playing:",
+          serverQueue.streams[0].metadata
+        ),
+      });
+    }
+    // Get specific stream
+    if (index && index >= 1 && index <= serverQueue.streams.length) {
+      const embedTitle = index === 1 ? "Playing next:" : "On queue:";
+      return message.channel.send({
+        embed: EMBED.STREAM_COMPACT(
+          embedTitle,
+          serverQueue.streams[index].metadata
+        ),
+      });
+    }
   }
+
   // Get queue
   message.channel.send({ embed: EMBED.QUEUE(serverQueue.streams) });
 };

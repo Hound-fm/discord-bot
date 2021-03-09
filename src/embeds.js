@@ -106,23 +106,26 @@ const QUEUE = (queue = []) => {
   };
 };
 
-const STREAM_COMPACT = ({
-  title,
-  author,
-  genres,
-  description,
-  thumbnail_url,
-  cannonical_url,
-  audio_duration,
-  publisher_title,
-  publisher_name,
-  publisher_id,
-  stream_type,
-  license,
-}) => {
+const STREAM_COMPACT = (
+  embedTitle,
+  {
+    title,
+    author,
+    genres,
+    description,
+    thumbnail_url,
+    cannonical_url,
+    audio_duration,
+    publisher_title,
+    publisher_name,
+    publisher_id,
+    stream_type,
+    license,
+  }
+) => {
   return {
     color: STREAM_COLORS[stream_type] || STREAM_COLORS.DEFAULT,
-    title: "Now playing:",
+    title: embedTitle,
     thumbnail: { url: thumbnail_url || "" },
     fields: [
       {
