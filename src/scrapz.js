@@ -153,6 +153,10 @@ const Scrapz = (claim) =>
       stream.publisher_title = publisher.value
         ? publisher.value.title
         : publisher.name;
+      // Channel thumbnail
+      if (publisher.value && publisher.value.thumbnail) {
+        stream.publisher_thumbnail_url = publisher.value.thumbnail.url;
+      }
     }
 
     // More filters

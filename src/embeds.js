@@ -167,6 +167,7 @@ const STREAM = ({
   publisher_title,
   publisher_name,
   publisher_id,
+  publisher_thumbnail_url,
   stream_type,
   license,
 }) => {
@@ -176,7 +177,7 @@ const STREAM = ({
     description: formatDescription(description),
     author: {
       name: author || publisher_title || "Uknown",
-      //icon_url: thumbnail_url,
+      // icon_url: publisher_thumbnail_url || "",
       url: getPublisherCanonicalUrl(publisher_name, publisher_id, "lbry.tv"),
     },
     thumbnail: { url: thumbnail_url },
