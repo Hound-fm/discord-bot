@@ -24,7 +24,7 @@ const HELP = {
   ** Links:** [Website](https://Hound.fm) • [Github](https://github.com/Hound-fm) • [Discord](https://discord.gg/Mbub3FfkZT)
 
   **Command list**
-  Check the full list of commands [here](https://github.com/Hound-fm/discord-bot#commands)
+  Check the full list of [commands](https://github.com/Hound-fm/discord-bot#commands)
 
   **Invite**
   Add the bot to your server. [Just click here](https://discord.com/api/oauth2/authorize?client_id=749751882984980620&permissions=0&scope=bot%20applications.commands)
