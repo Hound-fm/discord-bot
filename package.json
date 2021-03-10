@@ -26,5 +26,12 @@
     "remark": "^13.0.0",
     "strip-markdown": "^4.0.0",
     "yarn": "^1.22.10"
+  },
+  "devDependencies": {
+    "module-alias": "^2.2.2"
+  },
+  "_moduleAliases": {
+    "@": "./src",
+    "@data": "./data"
   }
 }

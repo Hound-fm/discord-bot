@@ -1,5 +1,5 @@
 const level = require("level-party");
-const DATABASE = __dirname + "/../data";
+const DATABASE = "../../data/db";
 
 module.exports.storePersistentData = async (guild, key, value) => {
   const db = level(DATABASE, { valueEncoding: "json" });
@@ -22,7 +22,6 @@ module.exports.loadPersistentData = async (guild, key) => {
     db.close();
   }
 };
-
 
 module.exports.getPrefixes = async (guild) => {
   const db = level(DATABASE, { valueEncoding: "json" });

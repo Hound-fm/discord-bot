@@ -1,12 +1,11 @@
 // Constants
-const { searchBestResult } = require("./search.js");
-const EMBED = require("./embeds.js");
-const ErrorHandler = require("./errors.js");
-const { inlineReply } = require("./bot.js");
-const { MESSAGE_STATUS } = require("./constants.js");
+const { searchBestResult } = require("@/lib/search.js");
+const EMBED = require("@/lib/embeds.js");
+const ErrorHandler = require("@/lib/errors.js");
+const client = require("@/bot.js");
+const { MESSAGE_STATUS } = require("@/constants.js");
 // Import utils
-const { setMessageStatus } = require("./utils.js");
-const { getStreamLink } = require("./lbryProxy.js");
+const { getStreamLink } = require("@/lbry/lbryProxy.js");
 
 const queue = new Map();
 
@@ -55,7 +54,7 @@ function play(message, serverQueue, item) {
     .play(item.source)
     .on("start", () => {
       console.info("Now playing: ", item.metadata.title);
-      inlineReply(message, {
+      client.inlineReply(message, {
         embed: EMBED.STREAM_COMPACT(
           "Now playing:",
           serverQueue.streams[0].metadata
@@ -223,7 +222,7 @@ module.exports.play = (message, searchQuery) =>
       // Join voice channel
       if (!serverQueue.connection) {
         await connect(message, serverQueue);
-        setMessageStatus(message, MESSAGE_STATUS.READY);
+        client.setMessageStatus(message, MESSAGE_STATUS.READY);
       }
 
       return resolve();

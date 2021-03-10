@@ -1,4 +1,4 @@
-const { parseURI } = require("./lbryURI.js");
+const { parseURI } = require("@/lbry/lbryURI.js");
 
 const webLink = (host, url) => {
   return encodeURI("https://" + host + "/" + url.replace(/(#)/g, ":"));
@@ -92,12 +92,6 @@ const durationShortFormat = (seconds = 0) => {
   return formated + " " + (formated === "1" ? "sec" : "secs");
 };
 
-const setMessageStatus = (message, status) => {
-  if (status && message && message.react) {
-    message.react(status);
-  }
-};
-
 const isHex = (str) => {
   const hex = /[0-9A-Fa-f]{6}/g;
   return hex.test(str);
@@ -141,7 +135,6 @@ module.exports = {
   truncateText,
   formatTitle,
   formatGenres,
-  setMessageStatus,
   durationShortFormat,
   getPublisherCanonicalUrl,
 };

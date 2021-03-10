@@ -1,7 +1,6 @@
-const { ERROR } = require("./embeds.js");
-const { MESSAGE_STATUS } = require("./constants.js");
-const { setMessageStatus } = require("./utils.js");
-const { client, setActivity, inlineReply } = require("./bot.js");
+const client = require("@/bot.js");
+const { ERROR } = require("@/lib/embeds.js");
+const { MESSAGE_STATUS } = require("@/constants.js");
 
 const ERRORS = {
   EMPTY_QUEUE:
@@ -17,11 +16,11 @@ module.exports.ERRORS = ERRORS;
 
 module.exports.sendError = (message, error) => {
   if (message) {
-    setMessageStatus(message, MESSAGE_STATUS.ERROR);
+    client.setMessageStatus(message, MESSAGE_STATUS.ERROR);
     if (!message.id) {
       message.channel.send({ embed: ERROR(error) });
       return;
     }
-    inlineReply(message, { embed: ERROR(error) });
+    client.inlineReply(message, { embed: ERROR(error) });
   }
 };

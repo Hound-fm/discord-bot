@@ -1,6 +1,8 @@
-const { COMMUNITY_POOL } = require("./embeds.js");
-
+// Bot Client
 const emoji = "✨";
+const client = require("@/bot.js");
+const { COMMUNITY_POOL } = require("@/lib/embeds.js");
+const { MESSAGE_STATUS } = require("@/constants.js");
 
 const ObserveReactions = (message, opts = { max: 5, time: 60 * 1000 }) => {
   const filter = (reaction, user) => {
@@ -14,7 +16,7 @@ const ObserveReactions = (message, opts = { max: 5, time: 60 * 1000 }) => {
     });
 };
 
-module.exports.CommunityPool = async (message, stream) => {
+const CommunityPool = async (message, stream) => {
   const pool = await message.channel.send({
     embed: COMMUNITY_POOL(message.author.toString(), stream),
   });
@@ -22,4 +24,17 @@ module.exports.CommunityPool = async (message, stream) => {
   pool.react(emoji);
   // Observe users reactions
   ObserveReactions(pool);
+};
+
+module.exports = {
+  name: "pick",
+  aliases: [],
+  description: "Community picks..",
+  // Command task
+  execute: async (message, args, arg) => {
+    const stream = await searchBestResult(message, arg);
+    if (stream) {
+      CommunityPool(message, stream);
+    }
+  },
 };

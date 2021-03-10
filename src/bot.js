@@ -1,7 +1,35 @@
+const fs = require("fs");
+const path = require("path");
 const Discord = require("discord.js");
 const client = new Discord.Client();
 
-module.exports.inlineReply = (message, replyData) => {
+const COMMANDS_PATH = path.resolve(__dirname, "commands");
+
+console.info(COMMANDS_PATH);
+
+client.commands = new Discord.Collection();
+
+client.loadCommands = () => {
+  const commandFiles = fs
+    .readdirSync(COMMANDS_PATH)
+    .filter((file) => file.endsWith(".js"));
+
+  for (const file of commandFiles) {
+    const command = require(path.resolve(COMMANDS_PATH, file));
+    client.commands.set(command.name, command);
+  }
+};
+
+// Inital commands loading
+client.loadCommands();
+
+client.setMessageStatus = (message, status) => {
+  if (status && message && message.react) {
+    message.react(status);
+  }
+};
+
+client.inlineReply = (message, replyData) => {
   if (!message.isSlashCommand) {
     client.api.channels[message.channel.id].messages.post({
       data: {
@@ -18,7 +46,7 @@ module.exports.inlineReply = (message, replyData) => {
   }
 };
 
-module.exports.setActivity = (type, name) => {
+client.setActivity = (type, name) => {
   // Set the client user's activity
   client.user
     .setActivity(name, { type })
@@ -29,9 +57,9 @@ module.exports.setActivity = (type, name) => {
 };
 
 // Resply for slash command interactions
-module.exports.replyInteraction = async (interaction, replyData = undefined) =>
+client.replyInteraction = async (interaction, replyData = undefined) =>
   await client.api
     .interactions(interaction.id, interaction.token)
     .callback.post({ data: { type: 5, data: replyData } });
 
-module.exports.client = client;
+module.exports = client;

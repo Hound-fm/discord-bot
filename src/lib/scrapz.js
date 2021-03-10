@@ -1,5 +1,5 @@
 // Scrapz utils
-const data = require("./data.json");
+const data = require("@data/genres.json");
 const memoize = require("memoizee");
 
 const parseTitle = (title, publisher) => {
@@ -31,7 +31,7 @@ const parseTitle = (title, publisher) => {
 };
 
 const GENRES_REGEX = (type) => {
-  const genresGroup = data["genres"][type];
+  const genresGroup = data[type];
   if (genresGroup) {
     return new RegExp(`\\b(${genresGroup.join("|")})\\b`, "g");
   }
