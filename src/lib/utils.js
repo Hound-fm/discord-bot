@@ -22,28 +22,6 @@ const getPublisherCanonicalUrl = (name, id, host) => {
   return encodeURI((host ? `https://${host}/` : "") + name + ":" + id[0]);
 };
 
-const parseMessage = (message = { content: "" }, prefixes) => {
-  const parsed = { arg: null, args: null, command: null, prefix: null };
-  // Format message
-  const textInput = message.content.trim();
-  // Find command prefix
-  if (textInput && textInput.length) {
-    parsed.prefix = prefixes.find((prefix) => prefix === textInput[0]);
-  }
-  if (textInput === "" || !parsed.prefix) {
-    return parsed;
-  }
-  parsed.args = message.content.slice(parsed.prefix.length).trim().split(/ +/g);
-  parsed.command = parsed.args.shift().toLowerCase();
-  // Single argument
-  parsed.arg = parsed.args.join(" ");
-  // Return parsed message
-  return parsed;
-};
-
-const isBotMention = (client, message) =>
-  message.mentions.users.get(client.user.id) != null;
-
 const truncateText = (str = "", limit = 40, format = "text") => {
   let truncated = str.trim();
   // Remove markdown format
@@ -130,8 +108,6 @@ module.exports = {
   webLink,
   getWebLinks,
   getStreamLink,
-  parseMessage,
-  isBotMention,
   truncateText,
   formatTitle,
   formatGenres,

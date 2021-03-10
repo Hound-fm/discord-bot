@@ -5,16 +5,12 @@ require("module-alias/register");
 const EMBED = require("@/lib/embeds.js");
 const { DEFAULT_PREFIXES, MESSAGE_STATUS } = require("@/constants.js");
 const Hound = require("@/lib/api.js");
-const Chance = require("chance");
 const VoiceStream = require("@/lib/voiceStream.js");
 const { searchBestResult } = require("@/lib/search.js");
 // Bot Client
 const client = require("@/bot.js");
 // Import utils
 const { parseMessage, isBotMention } = require("@/lib/utils.js");
-
-const chance_group = new Chance();
-const chance_list = new Chance();
 
 // Handle player actions
 const handleplayerCommands = async (message, { command, args, arg }) => {
@@ -89,31 +85,6 @@ const handleUserCommands = async (message, { command, args, arg }) => {
       const stream = await searchBestResult(message, arg);
       if (stream) {
         client.inlineReply(message, { embed: EMBED.STREAM(stream) });
-      }
-    }
-
-    if (command === "random" || command === "shuffle") {
-      // Get genre
-      let [genre] = args;
-      if (genre) {
-        genre = genre.replace(/-/g, " ");
-      }
-      // Randomize content group
-      const group = chance_group.pickone(["latest", "popular"]);
-      // Get streams list
-      const list = await Hound.getStreams(genre, group);
-      // Validate list
-      if (list && list.length) {
-        const shuffled = chance_list.shuffle(list);
-        const stream = shuffled[0];
-        if (stream && stream.cannonical_url && stream.publisher_title) {
-          client.setMessageStatus(message, MESSAGE_STATUS.READY);
-          client.inlineReply(message, { embed: EMBED.STREAM(stream) });
-        } else {
-          client.setMessageStatus(message, MESSAGE_STATUS.ERROR);
-        }
-      } else {
-        client.setMessageStatus(message, MESSAGE_STATUS.ERROR);
       }
     }
   } catch (error) {

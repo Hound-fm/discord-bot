@@ -7,7 +7,7 @@
   "author": "btzr-io <btzr.io@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "start": "node src/index.js",
+    "start": "node src/newIndex.js",
     "slash": "node slash.js",
     "format": "npx -p prettier@latest -p pretty-quick pretty-quick"
   },
