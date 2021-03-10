@@ -1,4 +1,4 @@
-const VoiceStream = require("@/lib/voiceStream.js");
+const VoiceStream = require("@/lib/voiceStream");
 
 module.exports = {
   name: "play",

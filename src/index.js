@@ -1,96 +1,13 @@
 // Load config
-require("module-alias/register");
 require("dotenv").config();
-// Constants
-const client = require("@/bot.js");
-const EMBED = require("@/lib/embeds.js");
-const { DEFAULT_PREFIXES, MESSAGE_STATUS } = require("@/constants.js");
-const Hound = require("@/lib/api.js");
-const VoiceStream = require("@/lib/voiceStream.js");
-const { searchBestResult } = require("@/lib/search.js");
+require("module-alias/register");
+require("@/loader");
+
 // Bot Client
-// Import utils
-const { parseMessage, isBotMention } = require("@/lib/utils.js");
-
-// Handle player actions
-const handleplayerCommands = async (message, { command, args, arg }) => {
-  try {
-    if (command === "play" || command === "p") {
-      const searchQuery = arg.trim();
-      await VoiceStream.play(message, searchQuery);
-    }
-
-    if (command === "pause") {
-      VoiceStream.pause(message);
-    }
-
-    if (command === "resume") {
-      VoiceStream.resume(message);
-    }
-
-    if (command === "skip" || command === "next") {
-      VoiceStream.resume(message);
-      VoiceStream.skip(message);
-    }
-
-    if (command === "queue") {
-      VoiceStream.getQueue(message, arg);
-    }
-
-    if (
-      command === "stop" ||
-      (command === "clear") | (command === "disconnect")
-    ) {
-      VoiceStream.stop(message);
-    }
-  } catch (error) {
-    handleErrors(error);
-  }
-};
-
-const handleAdminCommands = (message, { command, args, arg }) => {
-  try {
-    if (command === "prefix" && args && args.length > 1) {
-      if (args[0] === "add" && args[1] && args[1].length) {
-        console.info("Add new prefix!");
-        prefixes.push(args[1]);
-      }
-      if (args[0] === "remove" && args[1] && args[1].length) {
-        const index = prefixes.indexOf(args[1]);
-        if (index > -1) {
-          prefixes.splice(index, 1);
-        }
-      }
-    }
-  } catch (error) {
-    handleErrors(error);
-  }
-};
-
-const handleUserCommands = async (message, { command, args, arg }) => {
-  try {
-    if (command === "help" || command === "about") {
-      message.channel.send({ embed: EMBED.HELP });
-      client.setMessageStatus(message, MESSAGE_STATUS.READY);
-    }
-
-    if (command === "pick") {
-      const stream = await searchBestResult(message, arg);
-      if (stream) {
-        // CommunityPool(message, stream);
-      }
-    }
-
-    if (command === "search") {
-      const stream = await searchBestResult(message, arg);
-      if (stream) {
-        client.inlineReply(message, { embed: EMBED.STREAM(stream) });
-      }
-    }
-  } catch (error) {
-    client.setMessageStatus(message, MESSAGE_STATUS.ERROR);
-  }
-};
+const client = require("@/bot");
+// Constants
+const EMBED = require("@/lib/embeds");
+const { DEFAULT_PREFIXES, MESSAGE_STATUS } = require("@/constants");
 
 const handleErrors = (error) => {
   console.error(error);
@@ -101,70 +18,66 @@ client.on("message", async (message) => {
   if (message.channel.type === "dm") {
     return;
   }
-
   // Listen for bot mention
-  if (isBotMention(client, message)) {
+  if (client.isBotMention(client, message)) {
     message.channel.send({ embed: EMBED.HELP });
     return;
   }
-
-  const { arg, args, command, prefix } = parseMessage(
+  // Get command and args
+  const { arg, args, commandName, prefix } = client.parseMessage(
     message,
     DEFAULT_PREFIXES
   );
 
   // Ignore normal messages and other bots
-  if (!prefix || !command || message.author.bot) return;
+  if (!prefix || !commandName || message.author.bot) return;
 
-  // Player actions
   try {
-    // Handle admin commands
-    if (message.member.hasPermission("ADMINISTRATOR")) {
-      handleAdminCommands(message, { command, args, arg });
+    // Find registered command
+    const command =
+      client.commands.get(commandName) ||
+      client.commands.find(
+        (cmd) => cmd.aliases && cmd.aliases.includes(commandName)
+      );
+    // Ignore unregistered commands
+    if (!command) return;
+    // Check for permissisons
+    if (command.permissions) {
+      const authorPerms = message.channel.permissionsFor(message.author);
+      if (!authorPerms || !authorPerms.has(command.permissions)) {
+        return handleErrors("You can not do this!");
+      }
     }
-    // Handle community commands
-    handleplayerCommands(message, { command, args, arg });
-    handleUserCommands(message, { command, args, arg });
+    // Run registered command
+    await command.execute(message, args, arg);
   } catch (error) {
     handleErrors(error);
   }
 });
 
-const handlePlayerActions = async (interaction, action) => {
-  // Map message data:
-  // Compatibility with message commands and slash commands:
-  const message = {};
-  message.channel = await client.channels.fetch(interaction.channel_id);
-  message.guild = await client.guilds.fetch(interaction.guild_id);
-  message.member = await message.guild.members.fetch(
-    interaction.member.user.id
-  );
-  message.client = client;
-  message.isSlashCommand = true;
-  // Comamnd name
-  const command = action.name;
-  const args = action.options;
-  const arg = args ? args[0].value : null;
-  await client.replyInteraction(interaction);
-
-  // Player actions
-  handleplayerCommands(message, { command, arg });
-};
-
+// Slash commands
 client.ws.on("INTERACTION_CREATE", async (interaction) => {
   // Ignore direct messages (DM)
   if (!interaction.guild_id) {
     return;
   }
   try {
-    const { data } = interaction;
-    if (data.name === "player") {
-      const command = data.options[0];
-      if (command.name === "action") {
-        const action = command.options[0];
-        return handlePlayerActions(interaction, action);
+    const { commandName, args, arg } = client.parseInteraction(interaction);
+    const command = client.commands.get(commandName);
+    // Ignore unregistered commands
+    if (!command) return;
+    // Create message from interaction
+    const message = await client.mapInteractionMessage(interaction);
+    // Check for permissisons
+    if (command.permissions) {
+      const authorPerms = message.channel.permissionsFor(message.author);
+      if (!authorPerms || !authorPerms.has(command.permissions)) {
+        return handleErrors("You can not do this!");
       }
     }
+    // Reply interaction
+    await client.replyInteraction(interaction);
+    await command.execute(message, args, arg);
   } catch (error) {
     handleErrors(error);
   }

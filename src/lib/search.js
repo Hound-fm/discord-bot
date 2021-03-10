@@ -1,17 +1,17 @@
 const Fuse = require("fuse.js");
-const Scrapz = require("@/lib/scrapz.js");
-const ErrorHandler = require("@/lib/errors.js");
+const Scrapz = require("@/lib/scrapz");
+const ErrorHandler = require("@/lib/errors");
 const fetch = require("node-fetch");
 const memoize = require("memoizee");
 const querystring = require("querystring");
-const { MESSAGE_STATUS } = require("@/constants.js");
-const { lbryProxy } = require("@/lbry/lbryProxy.js");
-const { parseURI, buildURI } = require("@/lbry/lbryURI.js");
+const { MESSAGE_STATUS } = require("@/constants");
+const { lbryProxy } = require("@/lbry/lbryProxy");
+const { parseURI, buildURI } = require("@/lbry/lbryURI");
 const { PerformanceObserver, performance } = require("perf_hooks");
 // Import utils
-const { isHex, isClaimID, getClaimId, parseURL } = require("@/lib/utils.js");
+const { isHex, isClaimID, getClaimId, parseURL } = require("@/lib/utils");
 
-const client = require("@bot-client");
+const client = require("@/bot");
 
 const LIGHTHOUSE_API =
   "https://lighthouse.lbry.com/search?size=25&from=0&claimType=file&mediaType=audio&";

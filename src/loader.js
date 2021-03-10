@@ -1,6 +1,6 @@
 const fs = require("fs");
 const path = require("path");
-const client = require("@/bot.js");
+const client = require("@/bot");
 const COMMANDS_PATH = path.resolve(__dirname, "commands");
 
 // Load commands

@@ -1,13 +1,14 @@
 {
   "name": "discord-bot",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Community discord bot for hound.fm",
   "main": "src/index.js",
   "repository": "https://github.com/Hound-fm/discord-bot",
   "author": "btzr-io <btzr.io@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "start": "node src/newIndex.js",
+    "start": "pm2 start src/index.js --name=discord-bot",
+    "start:dev": "node src/newIndex.js",
     "slash": "node slash.js",
     "format": "npx -p prettier@latest -p pretty-quick pretty-quick"
   },
@@ -31,8 +32,8 @@
     "module-alias": "^2.2.2"
   },
   "_moduleAliases": {
-    "@": "./src",
-    "@data": "./data",
-    "@bot-client": "./src/bot.js"
+    "@": "src",
+    "@root": ".",
+    "@data": "data"
   }
 }

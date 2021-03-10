@@ -1,4 +1,4 @@
-const { parseURI } = require("@/lbry/lbryURI.js");
+const { parseURI } = require("@/lbry/lbryURI");
 
 const webLink = (host, url) => {
   return encodeURI("https://" + host + "/" + url.replace(/(#)/g, ":"));

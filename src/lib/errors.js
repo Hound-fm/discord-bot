@@ -1,6 +1,6 @@
-const client = require("@/bot.js");
-const { ERROR } = require("@/lib/embeds.js");
-const { MESSAGE_STATUS } = require("@/constants.js");
+const client = require("@/bot");
+const { ERROR } = require("@/lib/embeds");
+const { MESSAGE_STATUS } = require("@/constants");
 
 const ERRORS = {
   EMPTY_QUEUE:

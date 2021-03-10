@@ -1,5 +1,6 @@
 const remark = require("remark");
 const strip = require("strip-markdown");
+const { version } = require("@root/package.json");
 
 const {
   getWebLinks,
@@ -17,7 +18,7 @@ const ERROR = (message) => ({
 
 const HELP = {
   color: 3447003,
-  title: "Hound.fm - v0.0.1",
+  title: `Hound.fm - v${version}`,
   description: `
   A simple audio content aggregator for lbry.
 

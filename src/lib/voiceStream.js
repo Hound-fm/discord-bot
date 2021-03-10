@@ -1,11 +1,11 @@
 // Constants
-const { searchBestResult } = require("@/lib/search.js");
-const EMBED = require("@/lib/embeds.js");
-const ErrorHandler = require("@/lib/errors.js");
-const client = require("@/bot.js");
-const { MESSAGE_STATUS } = require("@/constants.js");
+const { searchBestResult } = require("@/lib/search");
+const EMBED = require("@/lib/embeds");
+const ErrorHandler = require("@/lib/errors");
+const client = require("@/bot");
+const { MESSAGE_STATUS } = require("@/constants");
 // Import utils
-const { getStreamLink } = require("@/lbry/lbryProxy.js");
+const { getStreamLink } = require("@/lbry/lbryProxy");
 
 const queue = new Map();
 
