@@ -3,7 +3,7 @@ Community discord bot for hound.fm
 
 ### Prefixes
 
-Default prefixes: `~` and `.`
+> Default prefixes: `~` and `.`
 
 Don't forget to include the prefix at the start of the message:
 ```python
