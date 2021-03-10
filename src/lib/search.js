@@ -2,7 +2,6 @@ const Fuse = require("fuse.js");
 const Scrapz = require("@/lib/scrapz.js");
 const ErrorHandler = require("@/lib/errors.js");
 const fetch = require("node-fetch");
-const client = require("@/bot.js");
 const memoize = require("memoizee");
 const querystring = require("querystring");
 const { MESSAGE_STATUS } = require("@/constants.js");
@@ -11,6 +10,8 @@ const { parseURI, buildURI } = require("@/lbry/lbryURI.js");
 const { PerformanceObserver, performance } = require("perf_hooks");
 // Import utils
 const { isHex, isClaimID, getClaimId, parseURL } = require("@/lib/utils.js");
+
+const client = require("@bot-client");
 
 const LIGHTHOUSE_API =
   "https://lighthouse.lbry.com/search?size=25&from=0&claimType=file&mediaType=audio&";
@@ -158,7 +159,7 @@ const searchBestResult = (message, searchQuery, searchOptions) =>
       // console.log("Search time: " + (t1 - t0) / 1000 + " seconds");
 
       if (results && results.length) {
-        client.setMessageStatus(message, MESSAGE_STATUS.READY);
+        // client.setMessageStatus(message, MESSAGE_STATUS.READY);
         const metadata = results[0];
         return resolve(metadata);
       } else {

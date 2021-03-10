@@ -1,29 +1,8 @@
-const fs = require("fs");
-const path = require("path");
 const Discord = require("discord.js");
+
 const client = new Discord.Client();
 
-const COMMANDS_PATH = path.resolve(__dirname, "commands");
-
-console.info(COMMANDS_PATH);
-
 client.commands = new Discord.Collection();
-
-client.reloadCommands = () => {
-  const commandFolders = ["user", "admin", "player"];
-  for (const folder of commandFolders) {
-    const commandFiles = fs
-      .readdirSync(COMMANDS_PATH + `/${folder}`)
-      .filter((file) => file.endsWith(".js"));
-    for (const file of commandFiles) {
-      const command = require(COMMANDS_PATH + `/${folder}/${file}`);
-      client.commands.set(command.name, command);
-    }
-  }
-};
-
-// Inital commands loading
-client.reloadCommands();
 
 client.setMessageStatus = (message, status) => {
   if (status && message && message.react) {
@@ -34,6 +13,38 @@ client.setMessageStatus = (message, status) => {
 client.isBotMention = (client, message) =>
   message.mentions.users.get(client.user.id) != null;
 
+// Map message data for compatibility with message commands and slash commands:
+client.mapInteractionMessage = async (interaction) => {
+  const message = {};
+  message.channel = await client.channels.fetch(interaction.channel_id);
+  message.guild = await client.guilds.fetch(interaction.guild_id);
+  message.member = await message.guild.members.fetch(
+    interaction.member.user.id
+  );
+  message.client = client;
+  message.isSlashCommand = true;
+  return message;
+};
+
+// Commands from slash commands
+client.parseInteraction = (interaction) => {
+  command = {};
+  // Parse interaction data
+  const { data } = interaction;
+  if (data.name === "player") {
+    const slashCommand = data.options[0];
+    if (slashCommand.name === "action") {
+      const action = slashCommand.options[0];
+      command.commandName = action.name;
+      command.args = action.options;
+      command.arg = command.args ? command.args[0].value : null;
+    }
+  }
+  // Return parsed command
+  return command;
+};
+
+// Commands from text message
 client.parseMessage = (message = { content: "" }, prefixes) => {
   const parsed = { arg: null, args: null, commandName: null, prefix: null };
   // Format message

@@ -32,6 +32,7 @@
   },
   "_moduleAliases": {
     "@": "./src",
-    "@data": "./data"
+    "@data": "./data",
+    "@bot-client": "./src/bot.js"
   }
 }

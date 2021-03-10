@@ -19,7 +19,6 @@ const action = (args) => {
     if (list && list.length) {
       const shuffled = chance_list.shuffle(list);
       const stream = shuffled[0];
-      console.info(stream)
       if (stream && stream.cannonical_url && stream.publisher_title) {
         // client.setMessageStatus(message, MESSAGE_STATUS.READY);
         client.inlineReply(message, { embed: EMBED.STREAM(stream) });
@@ -37,5 +36,5 @@ module.exports = {
   name: "random",
   aliases: ["shuffle"],
   description: "Get random stream",
-  execute: () => {},
+  execute: async () => {},
 };

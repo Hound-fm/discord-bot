@@ -1,14 +1,14 @@
 // Load config
-require("dotenv").config();
 require("module-alias/register");
+require("dotenv").config();
 // Constants
+const client = require("@/bot.js");
 const EMBED = require("@/lib/embeds.js");
 const { DEFAULT_PREFIXES, MESSAGE_STATUS } = require("@/constants.js");
 const Hound = require("@/lib/api.js");
 const VoiceStream = require("@/lib/voiceStream.js");
 const { searchBestResult } = require("@/lib/search.js");
 // Bot Client
-const client = require("@/bot.js");
 // Import utils
 const { parseMessage, isBotMention } = require("@/lib/utils.js");
 
