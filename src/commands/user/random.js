@@ -9,6 +9,7 @@ const { MESSAGE_STATUS } = require("@/constants.js");
 
 const chance = new Chance();
 const cacheRandomIndex = new Map();
+const categories = ["music", "audiobook", "podcast"]
 
 const getShuffledItems = memoize(
   async (category, genre) => {
@@ -26,15 +27,22 @@ const getShuffledItems = memoize(
 const getRandomStream = async (message, args, arg) => {
   // Get genre
   let stream;
-  let [genre] = args;
-  const indexKey = `index-${genre}`;
+  let genre = null
+  let category = "music"
+  let searchQuery = arg
 
-  if (genre) {
-    genre = genre.replace(/-/g, " ");
+  if (searchQuery) {
+    searchQuery = searchQuery.toLowerCase().replace(/-/g, " ").trim();
+    if ( categories.includes(searchQuery)) {
+      category = searchQuery
+    } else {
+      genre = searchQuery
+    }
   }
+  const indexKey = `index-${searchQuery.split(" ").join("-")}`;
 
   // Get streams list
-  const list = await getShuffledItems("music", genre);
+  const list = await getShuffledItems(category, genre);
 
   if (!list || !list.length) {
     client.setMessageStatus(message, MESSAGE_STATUS.ERROR);
