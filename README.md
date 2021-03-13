@@ -21,7 +21,8 @@ Anyone can use this commands:
 | name| alias | args | description |
 |---|---|---|---|
 | `help` | `about` |  | Show help message and useful information. |
-| `search` | | query: Lbry url, id or title  | Get information of lbry stream |
+| `search` | `find` | query: Lbry url, id or title  | Get information of lbry stream |
+| `random` | | query: category or genre | Get a random stream
 
 ### Player commands
 
