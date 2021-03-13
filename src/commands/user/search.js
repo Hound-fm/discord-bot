@@ -1,6 +1,5 @@
 // Bot Client
 const client = require("@/bot.js");
-
 const EMBED = require("@/lib/embeds.js");
 const { MESSAGE_STATUS } = require("@/constants.js");
 const { searchBestResult } = require("@/lib/search.js");

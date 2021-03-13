@@ -3,6 +3,7 @@ const emoji = "✨";
 const client = require("@/bot.js");
 const { COMMUNITY_POOL } = require("@/lib/embeds.js");
 const { MESSAGE_STATUS } = require("@/constants.js");
+const { searchBestResult } = require("@/lib/search.js");
 
 const ObserveReactions = (message, opts = { max: 5, time: 60 * 1000 }) => {
   const filter = (reaction, user) => {
