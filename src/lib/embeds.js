@@ -16,6 +16,15 @@ const ERROR = (message) => ({
   description: message,
 });
 
+const INVITATION_LINK =
+  "https://discord.com/api/oauth2/authorize?client_id=749751882984980620&permissions=3230784&scope=bot%20applications.commands";
+
+const INVITATION = {
+  color: 3447003,
+  title: `Invitation`,
+  description: INVITATION_LINK,
+};
+
 const HELP = {
   color: 3447003,
   title: `Hound.fm - v${version}`,
@@ -28,7 +37,7 @@ const HELP = {
   Check the full list of [commands](https://github.com/Hound-fm/discord-bot#commands)
 
   **Invite**
-  Add the bot to your server. [Just click here](https://discord.com/api/oauth2/authorize?client_id=749751882984980620&permissions=0&scope=bot%20applications.commands)
+  Add the bot to your server: [Invitation link](${INVITATION_LINK})
 
   **Support**
   Help development with a small donation (LBC):
@@ -254,6 +263,7 @@ module.exports = {
   ERROR,
   QUEUE,
   STREAM,
+  INVITATION,
   STREAM_COMPACT,
   COMMUNITY_POOL,
 };
