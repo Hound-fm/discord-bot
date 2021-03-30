@@ -14,10 +14,6 @@ const getWebLinks = (canonicalURL, format = "url", label) => {
   return hosts.map((host) => webLink(host, canonicalURL));
 };
 
-const getStreamLink = ({ name, id }) => {
-  return encodeURI(`https://lbry.tv/$/download/${name}/${id}`);
-};
-
 const getPublisherCanonicalUrl = (name, id, host = "odysee.com") => {
   return encodeURI((host ? `https://${host}/` : "") + name + ":" + id[0]);
 };
@@ -107,7 +103,6 @@ module.exports = {
   getClaimId,
   webLink,
   getWebLinks,
-  getStreamLink,
   truncateText,
   formatTitle,
   formatGenres,
