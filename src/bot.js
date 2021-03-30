@@ -98,4 +98,9 @@ client.replyInteraction = async (interaction, replyData = undefined) =>
     .interactions(interaction.id, interaction.token)
     .callback.post({ data: { type: 5, data: replyData } });
 
+client.resolveInteraction = async (interaction, replyData = undefined) =>
+  await client.api
+    .interactions(interaction.id, interaction.token)
+    .callback.post({ data: { type: 5, data: replyData } });
+
 module.exports = client;

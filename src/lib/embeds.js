@@ -67,8 +67,7 @@ const getPublisherMarkdownLink = (metadata) => {
     25
   )}](${getPublisherCanonicalUrl(
     metadata.publisher_name,
-    metadata.publisher_id,
-    "lbry.tv"
+    metadata.publisher_id
   )})`;
 };
 
@@ -143,8 +142,7 @@ const STREAM_COMPACT = (
         name: title ? formatTitle(title) : "Uknown",
         value: `By [${publisher_title}](${getPublisherCanonicalUrl(
           publisher_name,
-          publisher_id,
-          "lbry.tv"
+          publisher_id
         )})`,
       },
       {
@@ -188,7 +186,7 @@ const STREAM = ({
     author: {
       name: author || publisher_title || "Uknown",
       // icon_url: publisher_thumbnail_url || "",
-      url: getPublisherCanonicalUrl(publisher_name, publisher_id, "lbry.tv"),
+      url: getPublisherCanonicalUrl(publisher_name, publisher_id),
     },
     thumbnail: { url: thumbnail_url },
     fields: [
@@ -231,8 +229,7 @@ const COMMUNITY_POOL = (user, stream) => ({
       name: stream.title,
       value: `By [${stream.publisher_title}](${getPublisherCanonicalUrl(
         stream.publisher_name,
-        stream.publisher_id,
-        "lbry.tv"
+        stream.publisher_id
       )})`,
     },
     {
